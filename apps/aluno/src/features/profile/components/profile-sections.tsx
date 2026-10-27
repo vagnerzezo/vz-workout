@@ -137,9 +137,9 @@ const formatKgShort = (kg: number) => (Number.isInteger(kg) ? formatInt(kg) : fo
 
 const links = [
   { to: '/perfil/progresso', label: 'Progresso', icon: LineChart },
-  { to: '/perfil/progresso?aba=fotos', label: 'Fotos de evolução', icon: Image },
+  { to: '/perfil/progresso#fotos', label: 'Fotos de evolução', icon: Image },
   { to: '/treinos/historico', label: 'Histórico de treinos', icon: History },
-  { to: '/perfil/progresso?aba=check-ins', label: 'Check-ins anteriores', icon: ClipboardList },
+  { to: '/perfil/progresso#medidas', label: 'Check-ins anteriores', icon: ClipboardList },
 ]
 
 export function ProfileLinks() {

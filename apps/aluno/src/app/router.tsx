@@ -16,6 +16,7 @@ export const routes: RouteObject[] = [
   { path: '/treinos/:dayId/ativo', ...page(() => import('../features/workout/pages/active-workout-page')) },
   { path: '/treinos/:sessionId/resumo', ...page(() => import('../features/workout/pages/session-summary-page')) },
   { path: '/treinos/historico', ...page(() => import('../features/workout/pages/history-page')) },
+  { path: '/perfil/progresso', ...page(() => import('../features/profile/pages/progress-page')) },
   { path: '/dieta/lista-de-compras', ...page(() => import('../features/diet/pages/shopping-list-page')) },
   { path: '/dieta/refeicoes/:mealId', ...page(() => import('../features/diet/pages/meal-page')) },
   {
@@ -29,7 +30,6 @@ export const routes: RouteObject[] = [
       { path: 'perfil', ...page(() => import('../features/profile/pages/profile-page')) },
       { path: 'perfil/check-in', ...comingSoon('Check-in') },
       { path: 'perfil/configuracoes', ...comingSoon('Configurações') },
-      { path: 'perfil/progresso', ...comingSoon('Progresso') },
       { path: '*', ...comingSoon('Página não encontrada') },
     ],
   },

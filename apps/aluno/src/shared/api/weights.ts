@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { WeightEntry } from '@workspace/core'
 import { api } from './client'
 
-/** Registra uma pesagem; a Home ("Último peso") e o Perfil (objetivo de peso) recarregam. */
+/** Registra uma pesagem; a Home ("Último peso"), o Perfil (objetivo de peso) e o Progresso recarregam. */
 export function useLogWeight() {
   const qc = useQueryClient()
   return useMutation({

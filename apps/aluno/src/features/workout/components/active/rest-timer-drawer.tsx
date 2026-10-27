@@ -35,7 +35,7 @@ export function RestTimerDrawer({ open, onOpenChange, next }: RestTimerDrawerPro
             <DrawerTitle className="text-center text-[17px] font-extrabold">Descanso</DrawerTitle>
           </div>
           <Tabs defaultValue="timer" className="gap-3.5">
-            <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-2xl border bg-sunken p-1">
+            <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-2xl border bg-sunken p-1 group-data-horizontal/tabs:h-auto">
               <TabsTrigger value="timer" className={segment}>
                 Timer
               </TabsTrigger>

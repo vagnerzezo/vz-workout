@@ -2,6 +2,7 @@ import { delay } from 'msw'
 import type { DietDay, LoggedSet, ShoppingListState, WaterLog, WeightEntry, WorkoutSession } from '@workspace/core'
 import { toIsoDate } from '@workspace/core'
 import { initialWater, mondayOf, type FinishedSession } from './fixtures/renato'
+import { initialWeights } from './fixtures/renato-progress'
 
 /** Estado em memória da API simulada. Volta ao início ao recarregar a página. */
 type Db = {
@@ -19,7 +20,7 @@ type Db = {
 
 const initial = (): Db => ({
   water: initialWater(),
-  weights: [{ id: 'kg1', kg: 82.4, date: '2026-10-14' }],
+  weights: initialWeights(),
   liveSets: {},
   sessions: [],
   dietDays: {},
