@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { greetingFor, homeDateLabel, parseIsoDate, weekdayLetter } from './date'
-import { formatDuration, formatInt, formatLiters } from './numbers'
+import { formatBRL, formatDuration, formatInt, formatLiters } from './numbers'
 
 const at = (h: number) => new Date(2026, 9, 21, h, 0)
 
@@ -64,4 +64,11 @@ describe('formatInt', () => {
   it('separa milhar com ponto', () => {
     expect(formatInt(2127)).toBe('2.127')
   })
+})
+
+describe('formatBRL', () => {
+  it.each([
+    [600, 'R$ 600,00'],
+    [1250.5, 'R$ 1.250,50'],
+  ])('%s → %s', (n, text) => expect(formatBRL(n)).toBe(text))
 })

@@ -5,6 +5,8 @@ import { WARMUP_REST_SECONDS } from '@workspace/core'
 import { Button } from '@workspace/ui/components/button'
 import { Skeleton } from '@workspace/ui/components/skeleton'
 import { ErrorState } from '../../../shared/components/error-state'
+import { useWakeLock } from '../../../shared/hooks/use-wake-lock'
+import { useDevicePrefs } from '../../../shared/prefs/device-prefs'
 import { useSessionTemplate, useSyncPendingSets } from '../api/session'
 import { ActiveHeader } from '../components/active/active-header'
 import { ExerciseBlock } from '../components/active/exercise-block'
@@ -24,6 +26,7 @@ export default function ActiveWorkoutPage() {
   const finished = useRef(false)
 
   const active = useActiveWorkout()
+  useWakeLock(useDevicePrefs((s) => s.keepAwake))
   const hasProgress = Object.keys(active.entries).length > 0
   const otherWorkout = active.dayId !== null && active.dayId !== dayId && hasProgress
   const view = useSessionView(template.data, active.dayId === dayId ? active.entries : {}, active.extraSets)

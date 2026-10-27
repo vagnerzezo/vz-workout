@@ -32,7 +32,7 @@ export function useSendCheckIn() {
     mutationFn: ({ id, answers, photos }: { id: string; answers: CheckInAnswers; photos: Partial<Record<PhotoPose, File>> }) => {
       const body = new FormData()
       body.set('answers', JSON.stringify(answers))
-      for (const [pose, file] of Object.entries(photos)) body.set(`photo_${pose}`, file)
+      for (const [pose, file] of Object.entries(photos)) body.set(`photo_${pose}`, file, file.name)
       return api(`/me/check-ins/${id}`, z.object({ id: z.string() }), { method: 'POST', body })
     },
     onSuccess: () => {

@@ -1,7 +1,8 @@
 import { delay } from 'msw'
-import type { DietDay, LoggedSet, ProgressPhoto, ShoppingListState, WaterLog, WeightEntry, WorkoutSession } from '@workspace/core'
+import type { Charge, DietDay, LoggedSet, NotificationSettings, ProgressPhoto, ShoppingListState, WaterLog, WeightEntry, WorkoutSession } from '@workspace/core'
 import { toIsoDate } from '@workspace/core'
 import { initialWater, mondayOf, type FinishedSession } from './fixtures/renato'
+import { renatoCharge } from './fixtures/renato-billing'
 import { initialWeights, renatoPhotos } from './fixtures/renato-progress'
 
 /** Estado em memória da API simulada. Volta ao início ao recarregar a página. */
@@ -19,6 +20,9 @@ type Db = {
   photos: ProgressPhoto[]
   /** Check-ins já enviados, por id */
   sentCheckIns: string[]
+  notifications: NotificationSettings
+  /** Cobrança da renovação (null depois de paga) */
+  charge: Charge | null
   nextId: number
 }
 
@@ -31,6 +35,8 @@ const initial = (): Db => ({
   shopping: { checkedIds: ['banana', 'ovos', 'arroz_branco'], extras: [] }, // como no canvas: 3 itens já comprados
   photos: renatoPhotos,
   sentCheckIns: [],
+  notifications: { workout: true, meals: true, water: false, checkIn: true, chat: true }, // como no canvas
+  charge: renatoCharge(),
   nextId: 1,
 })
 

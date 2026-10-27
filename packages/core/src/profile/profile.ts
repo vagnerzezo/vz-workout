@@ -49,3 +49,13 @@ export function weightProgress(startKg: number, currentKg: number, goalKg: numbe
   const percent = totalKg === 0 ? 100 : Math.min(100, Math.max(0, Math.round((doneKg / totalKg) * 100)))
   return { doneKg, totalKg, percent }
 }
+
+/** Quando a ficha foi baixada: "hoje, 07:12" · "ontem, 21:40" · "em 18/10". */
+export function syncedLabel(iso: string, now: Date): string {
+  const at = new Date(iso)
+  const days = differenceInCalendarDays(now, at)
+  const time = `${String(at.getHours()).padStart(2, '0')}:${String(at.getMinutes()).padStart(2, '0')}`
+  if (days === 0) return `hoje, ${time}`
+  if (days === 1) return `ontem, ${time}`
+  return `em ${String(at.getDate()).padStart(2, '0')}/${String(at.getMonth() + 1).padStart(2, '0')}`
+}

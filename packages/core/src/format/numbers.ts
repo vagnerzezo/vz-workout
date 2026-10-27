@@ -59,3 +59,8 @@ export function formatDeltaKg(kg: number): string {
   if (kg === 0) return '='
   return `${kg > 0 ? '+' : '−'}${formatKg(Math.abs(kg))}`
 }
+
+const brlFormat = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+
+/** 600 → "R$ 600,00" (com espaço comum, não o espaço fino do Intl) */
+export const formatBRL = (reais: number) => brlFormat.format(reais).replace(/\s/g, ' ')

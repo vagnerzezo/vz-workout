@@ -24,3 +24,13 @@ export const StudentProfile = z.object({
   currentWeightKg: z.number().positive().nullable(), // último peso registrado
 })
 export type StudentProfile = z.infer<typeof StudentProfile>
+
+/** GET/PUT /me/settings: lembretes que o servidor agenda e envia por push. */
+export const NotificationSettings = z.object({
+  workout: z.boolean(), // lembrete de treino, nos dias de treino
+  meals: z.boolean(), // 15 min antes de cada refeição do plano
+  water: z.boolean(),
+  checkIn: z.boolean(), // quando o treinador pedir ou responder
+  chat: z.boolean(),
+})
+export type NotificationSettings = z.infer<typeof NotificationSettings>

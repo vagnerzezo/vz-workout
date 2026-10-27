@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ageOn, dueLabel, initials, timeSince, weightProgress } from './profile'
+import { ageOn, dueLabel, initials, syncedLabel, timeSince, weightProgress } from './profile'
 
 const today = new Date(2026, 9, 21) // quarta, 21/10/2026
 
@@ -56,4 +56,12 @@ describe('weightProgress', () => {
   it('passou da meta: 100%', () => {
     expect(weightProgress(85, 75, 76).percent).toBe(100)
   })
+})
+
+describe('syncedLabel', () => {
+  it.each([
+    [new Date(2026, 9, 21, 7, 12), 'hoje, 07:12'],
+    [new Date(2026, 9, 20, 21, 40), 'ontem, 21:40'],
+    [new Date(2026, 9, 18, 9, 0), 'em 18/10'],
+  ])('%s → %s', (at, text) => expect(syncedLabel(at.toISOString(), today)).toBe(text))
 })

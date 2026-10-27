@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Outlet } from 'react-router'
 import { Dumbbell, House, User, Utensils } from 'lucide-react'
 import { BottomNav, type BottomNavItem } from '@workspace/ui/blocks/bottom-nav'
+import { useOfflinePlanSync } from '../features/workout/api/offline'
 import { useMe } from '../shared/api/me'
 import { applyBrand } from '../shared/branding/apply-brand'
 
@@ -14,6 +15,7 @@ const navItems: BottomNavItem[] = [
 
 export function AppShell() {
   const { data: me } = useMe()
+  useOfflinePlanSync()
 
   useEffect(() => {
     if (me) applyBrand(me.branding.brandColor)

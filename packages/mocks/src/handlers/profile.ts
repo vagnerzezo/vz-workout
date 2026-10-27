@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import type { StudentProfile } from '@workspace/core'
+import { NotificationSettings } from '@workspace/core'
 import { toIsoDate } from '@workspace/core'
 import { currentScenario, db, latency } from '../db'
 import { renatoMe } from '../fixtures/renato'
@@ -33,5 +34,20 @@ export const profileHandlers = [
       weightGoal: { startKg: 85, startDate: '2026-08-01', goalKg: 76 },
       currentWeightKg: isNew ? null : (db.weights.at(-1)?.kg ?? null),
     })
+  }),
+
+  http.get('/api/me/settings', async () => {
+    await latency()
+    if (currentScenario() === 'erro') return HttpResponse.json({ message: 'Erro simulado' }, { status: 500 })
+    return HttpResponse.json<NotificationSettings>(db.notifications)
+  }),
+
+  // Atualização parcial: só as chaves enviadas mudam
+  http.put('/api/me/settings', async ({ request }) => {
+    const patch = NotificationSettings.partial().strict().safeParse(await request.json())
+    if (!patch.success) return HttpResponse.json({ message: 'Preferência inválida' }, { status: 422 })
+    await latency()
+    db.notifications = { ...db.notifications, ...patch.data }
+    return HttpResponse.json<NotificationSettings>(db.notifications)
   }),
 ]

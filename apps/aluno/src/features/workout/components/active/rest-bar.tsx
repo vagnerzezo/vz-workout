@@ -3,6 +3,8 @@ import { Timer } from 'lucide-react'
 import { formatClock, formatKg, shortExerciseName } from '@workspace/core'
 import { Button } from '@workspace/ui/components/button'
 import { useNow } from '../../../../shared/hooks/use-now'
+import { restFinishedAlert } from '../../../../shared/lib/beep'
+import { useDevicePrefs } from '../../../../shared/prefs/device-prefs'
 import type { SessionView } from '../../hooks/use-session-view'
 import { restLeft, useActiveWorkout } from '../../store/active-workout'
 
@@ -25,9 +27,10 @@ export function RestBar({ next, onOpenTimer }: { next: SessionView['next']; onOp
   const resting = left > 0
   const finished = rest.endsAt !== null && left === 0
 
+  const sound = useDevicePrefs((s) => s.sound)
   useEffect(() => {
-    if (finished) navigator.vibrate?.(300)
-  }, [finished])
+    if (finished && sound) restFinishedAlert()
+  }, [finished, sound])
 
   return (
     <div className="fixed inset-x-0 bottom-[calc(20px+env(safe-area-inset-bottom))] z-40 mx-auto w-full max-w-[430px] px-4">
