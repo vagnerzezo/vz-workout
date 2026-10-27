@@ -21,6 +21,8 @@ export const routes: RouteObject[] = [
       { path: '/treinos/:dayId/ativo', ...page(() => import('../features/workout/pages/active-workout-page')) },
       { path: '/treinos/:sessionId/resumo', ...page(() => import('../features/workout/pages/session-summary-page')) },
       { path: '/treinos/historico', ...page(() => import('../features/workout/pages/history-page')) },
+      { path: '/chat', ...page(() => import('../features/chat/pages/chat-page')) },
+      { path: '/notificacoes', ...page(() => import('../features/notifications/pages/notifications-page')) },
       { path: '/perfil/pagamento', ...page(() => import('../features/profile/pages/payment-page')) },
       { path: '/perfil/configuracoes', ...page(() => import('../features/profile/pages/settings-page')) },
       { path: '/perfil/check-in', ...page(() => import('../features/profile/pages/check-in-page')) },
@@ -31,8 +33,6 @@ export const routes: RouteObject[] = [
         element: <AppShell />, // BottomNav
         children: [
           { index: true, ...page(() => import('../features/home/pages/home-page')) },
-          { path: 'notificacoes', ...comingSoon('Notificações') },
-          { path: 'chat', ...comingSoon('Chat') },
           { path: 'treinos', ...page(() => import('../features/workout/pages/workout-list-page')) },
           { path: 'dieta', ...page(() => import('../features/diet/pages/diet-page')) },
           { path: 'perfil', ...page(() => import('../features/profile/pages/profile-page')) },

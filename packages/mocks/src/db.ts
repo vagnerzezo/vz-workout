@@ -1,5 +1,5 @@
 import { delay } from 'msw'
-import type { Charge, DietDay, LoggedSet, NotificationSettings, ProgressPhoto, ShoppingListState, WaterLog, WeightEntry, WorkoutSession } from '@workspace/core'
+import type { Charge, DietDay, LoggedSet, Message, NotificationSettings, ProgressPhoto, ShoppingListState, WaterLog, WeightEntry, WorkoutSession } from '@workspace/core'
 import { toIsoDate } from '@workspace/core'
 import { initialWater, mondayOf, type FinishedSession } from './fixtures/renato'
 import { renatoCharge } from './fixtures/renato-billing'
@@ -23,6 +23,12 @@ type Db = {
   notifications: NotificationSettings
   /** Cobrança da renovação (null depois de paga) */
   charge: Charge | null
+  /** Ids das notificações ainda não lidas */
+  unreadNotifications: string[]
+  /** Mensagens que o aluno mandou pelo app */
+  sentMessages: Message[]
+  /** O aluno já abriu a conversa (some a bolinha do chat na Home) */
+  chatOpened: boolean
   nextId: number
 }
 
@@ -35,8 +41,11 @@ const initial = (): Db => ({
   shopping: { checkedIds: ['banana', 'ovos', 'arroz_branco'], extras: [] }, // como no canvas: 3 itens já comprados
   photos: renatoPhotos,
   sentCheckIns: [],
-  notifications: { workout: true, meals: true, water: false, checkIn: true, chat: true }, // como no canvas
+  notifications: { workout: true, meals: true, water: false, checkIn: true, chat: true, records: true, quietHours: true }, // como no canvas
   charge: renatoCharge(),
+  unreadNotifications: ['n1', 'n2', 'n3'], // como no canvas: 3 não lidas
+  sentMessages: [],
+  chatOpened: false,
   nextId: 1,
 })
 

@@ -4,12 +4,14 @@ import { toIsoDate } from '@workspace/core'
 import { currentScenario, db, finishedThisWeek, latency, newId } from '../db'
 import { renatoHome, renatoMe } from '../fixtures/renato'
 import { renatoPlan } from '../fixtures/renato-plan'
+import { hasUnreadMessages } from './chat'
 import { homeNutrition } from './diet'
+import { inbox } from './notifications'
 
 function homeFor(today: Date): HomeSummary {
   const lastWeightKg = db.weights.at(-1)?.kg ?? null
   const plan = currentScenario() === 'sem-ficha' ? null : renatoPlan
-  const home = renatoHome(plan, today, homeNutrition(today), lastWeightKg, finishedThisWeek(today))
+  const home = { ...renatoHome(plan, today, homeNutrition(today), lastWeightKg, finishedThisWeek(today)), unreadNotifications: inbox(today).filter((n) => !n.read).length, hasUnreadMessages: hasUnreadMessages(today) }
 
   switch (currentScenario()) {
     case 'descanso':

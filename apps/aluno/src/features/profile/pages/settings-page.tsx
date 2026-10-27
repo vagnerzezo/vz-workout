@@ -12,6 +12,7 @@ import { useActiveWorkout } from '../../workout/store/active-workout'
 import { install, isIos, useInstall } from '../../../shared/pwa/install'
 import { useDevicePrefs } from '../../../shared/prefs/device-prefs'
 import { useProfile } from '../api/queries'
+import { reminderHints } from '../api/reminder-hints'
 import { useNotificationSettings, useUpdateNotificationSettings } from '../api/settings'
 
 const iconButton =
@@ -145,11 +146,11 @@ function InstallCard() {
 }
 
 const notificationRows: { key: keyof NotificationSettings; label: string; hint: string }[] = [
-  { key: 'workout', label: 'Lembrete de treino', hint: 'Nos dias de treino, às 18:00' },
-  { key: 'meals', label: 'Lembrete de refeições', hint: '15 min antes de cada horário do plano' },
-  { key: 'water', label: 'Lembrete de água', hint: 'A cada 2 horas, das 8h às 20h' },
-  { key: 'checkIn', label: 'Check-in e feedback', hint: 'Quando o treinador pedir ou responder' },
-  { key: 'chat', label: 'Mensagens do chat', hint: 'Novas mensagens do treinador' },
+  { key: 'workout', label: 'Lembrete de treino', hint: reminderHints.workout },
+  { key: 'meals', label: 'Lembrete de refeições', hint: reminderHints.meals },
+  { key: 'water', label: 'Lembrete de água', hint: reminderHints.water },
+  { key: 'checkIn', label: 'Check-in e feedback', hint: reminderHints.checkIn },
+  { key: 'chat', label: 'Mensagens do chat', hint: reminderHints.chat },
 ]
 
 function NotificationsGroup() {

@@ -32,5 +32,7 @@ export const NotificationSettings = z.object({
   water: z.boolean(),
   checkIn: z.boolean(), // quando o treinador pedir ou responder
   chat: z.boolean(),
+  records: z.boolean(), // quando bater uma marca
+  quietHours: z.boolean(), // nada entre 22h e 7h (mensagens do treinador chegam mesmo assim)
 })
 export type NotificationSettings = z.infer<typeof NotificationSettings>
