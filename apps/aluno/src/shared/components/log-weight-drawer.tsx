@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactElement } from 'react'
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatDecimal } from '@workspace/core'
@@ -13,11 +13,17 @@ import {
   DrawerTrigger,
 } from '@workspace/ui/components/drawer'
 import { Stepper } from '@workspace/ui/blocks/stepper'
-import { useLogWeight } from '../api/queries'
+import { useLogWeight } from '../api/weights'
 
 const DEFAULT_KG = 70
 
-export function LogWeightDrawer({ lastWeightKg }: { lastWeightKg: number | null }) {
+type LogWeightDrawerProps = {
+  lastWeightKg: number | null
+  trigger?: ReactElement // botão que abre; o padrão é o "Registrar peso" da Home
+  triggerLabel?: string
+}
+
+export function LogWeightDrawer({ lastWeightKg, trigger, triggerLabel = 'Registrar peso' }: LogWeightDrawerProps) {
   const [open, setOpen] = useState(false)
   const [kg, setKg] = useState(lastWeightKg ?? DEFAULT_KG)
   const logWeight = useLogWeight()
@@ -40,11 +46,11 @@ export function LogWeightDrawer({ lastWeightKg }: { lastWeightKg: number | null 
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerTrigger
         render={
-          <Button variant="outline" size="sm" className="h-9 border-primary px-3.5 font-bold text-primary hover:bg-primary/10" />
+          trigger ?? <Button variant="outline" size="sm" className="h-9 border-primary px-3.5 font-bold text-primary hover:bg-primary/10" />
         }
       >
         <Plus aria-hidden="true" strokeWidth={2.4} />
-        Registrar peso
+        {triggerLabel}
       </DrawerTrigger>
       <DrawerContent className="mx-auto max-w-[430px] rounded-t-[26px] pb-[env(safe-area-inset-bottom)]">
         <DrawerHeader className="gap-1 pt-6">

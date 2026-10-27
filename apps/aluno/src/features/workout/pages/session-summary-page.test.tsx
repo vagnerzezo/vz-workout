@@ -125,7 +125,7 @@ describe('Resumo do treino', () => {
     const user = userEvent.setup()
     const { router } = await openSummary()
     await user.click(screen.getByRole('link', { name: 'Voltar ao treino' }))
-    await waitFor(() => expect(router.state.location.pathname).toBe('/treinos/day_c/ativo'))
+    await waitFor(() => expect(router.state.location.pathname).toBe('/treinos/day_c/ativo'), { timeout: 3000 }) // rota lazy: a 1ª carga demora com a suíte em paralelo
     expect(useActiveWorkout.getState().finishedAt).toBeNull()
     expect(await screen.findByText('4 de 22')).toBeInTheDocument()
   })

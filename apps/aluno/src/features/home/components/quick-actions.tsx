@@ -1,5 +1,5 @@
 import { Flame } from 'lucide-react'
-import { LogWeightDrawer } from './log-weight-drawer'
+import { LogWeightDrawer } from '../../../shared/components/log-weight-drawer'
 
 export function QuickActions({ streakDays, lastWeightKg }: { streakDays: number; lastWeightKg: number | null }) {
   return (

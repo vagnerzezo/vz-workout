@@ -92,7 +92,7 @@ export const workoutHandlers = [
 ]
 
 /** Histórico gerado + treinos salvos pelo app, do mais recente para o mais antigo. */
-function allSessions(today: Date, isNew: boolean): HistorySession[] {
+export function allSessions(today: Date, isNew: boolean): HistorySession[] {
   const saved = db.sessions.map(historyFromSession).filter((s): s is HistorySession => s !== null)
   const generated = isNew ? [] : generatedHistory(today)
   return [...saved, ...generated].sort((a, b) => b.date.localeCompare(a.date))
