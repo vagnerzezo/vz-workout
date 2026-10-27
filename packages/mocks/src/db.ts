@@ -1,8 +1,8 @@
 import { delay } from 'msw'
-import type { DietDay, LoggedSet, ShoppingListState, WaterLog, WeightEntry, WorkoutSession } from '@workspace/core'
+import type { DietDay, LoggedSet, ProgressPhoto, ShoppingListState, WaterLog, WeightEntry, WorkoutSession } from '@workspace/core'
 import { toIsoDate } from '@workspace/core'
 import { initialWater, mondayOf, type FinishedSession } from './fixtures/renato'
-import { initialWeights } from './fixtures/renato-progress'
+import { initialWeights, renatoPhotos } from './fixtures/renato-progress'
 
 /** Estado em memória da API simulada. Volta ao início ao recarregar a página. */
 type Db = {
@@ -15,6 +15,10 @@ type Db = {
   dietDays: Record<string, DietDay>
   /** Lista de compras: o que já foi comprado e os itens fora do plano */
   shopping: ShoppingListState
+  /** Fotos de evolução (as dos check-ins enviados entram aqui) */
+  photos: ProgressPhoto[]
+  /** Check-ins já enviados, por id */
+  sentCheckIns: string[]
   nextId: number
 }
 
@@ -25,6 +29,8 @@ const initial = (): Db => ({
   sessions: [],
   dietDays: {},
   shopping: { checkedIds: ['banana', 'ovos', 'arroz_branco'], extras: [] }, // como no canvas: 3 itens já comprados
+  photos: renatoPhotos,
+  sentCheckIns: [],
   nextId: 1,
 })
 

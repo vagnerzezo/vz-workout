@@ -1,9 +1,9 @@
-import { addDays } from 'date-fns'
 import { http, HttpResponse } from 'msw'
 import type { StudentProfile } from '@workspace/core'
 import { toIsoDate } from '@workspace/core'
 import { currentScenario, db, latency } from '../db'
 import { renatoMe } from '../fixtures/renato'
+import { pendingCheckIn } from './checkin'
 import { allSessions } from './workout'
 
 export const profileHandlers = [
@@ -13,6 +13,7 @@ export const profileHandlers = [
     if (scenario === 'erro') return HttpResponse.json({ message: 'Erro simulado' }, { status: 500 })
     const today = new Date()
     const isNew = scenario === 'novo'
+    const checkIn = pendingCheckIn(today)
     return HttpResponse.json<StudentProfile>({
       fullName: renatoMe.fullName,
       birthDate: '1993-05-12',
@@ -23,8 +24,12 @@ export const profileHandlers = [
       streakDays: isNew ? 0 : 3, // o mesmo da Home
       coach: { name: 'Carlos Oliveira' },
       subscription: { planLabel: 'trimestral', endsAt: '2026-12-15' },
-      // Sempre vence daqui a 2 dias, como no canvas
-      checkIn: isNew ? null : { label: 'Check-in quinzenal', dueDate: toIsoDate(addDays(today, 2)), photoCount: 3, questionCount: 6 },
+      checkIn: checkIn && {
+        label: checkIn.label,
+        dueDate: checkIn.dueDate,
+        photoCount: checkIn.poses.length,
+        questionCount: checkIn.questions.length + 1, // + a pergunta da dor
+      },
       weightGoal: { startKg: 85, startDate: '2026-08-01', goalKg: 76 },
       currentWeightKg: isNew ? null : (db.weights.at(-1)?.kg ?? null),
     })

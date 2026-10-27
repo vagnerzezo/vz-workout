@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { PhotoPose } from './checkin'
 import { WeightEntry } from './home'
 
 export const Measurement = z.object({
@@ -14,7 +15,7 @@ export type Measurement = z.infer<typeof Measurement>
 export const ProgressPhoto = z.object({
   id: z.string(),
   date: z.iso.date(),
-  pose: z.enum(['front', 'side', 'back']),
+  pose: PhotoPose,
   weightKg: z.number().positive().nullable(), // peso no dia da foto
   url: z.string().nullable(), // null: o aluno enviou o check-in, mas a foto ainda está processando
 })

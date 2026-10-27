@@ -12,7 +12,8 @@ export class ApiError extends Error {
 export async function api<T extends z.ZodType>(path: string, schema: T, init?: RequestInit): Promise<z.infer<T>> {
   const res = await fetch(`/api${path}`, {
     ...init,
-    headers: { 'Content-Type': 'application/json', ...init?.headers },
+    // FormData (fotos) deixa o navegador montar o Content-Type com o boundary
+    headers: init?.body instanceof FormData ? init.headers : { 'Content-Type': 'application/json', ...init?.headers },
     credentials: 'include', // a sessão vai em cookie httpOnly (decisão para a fase da API)
   })
   if (!res.ok) throw new ApiError(res.status, await res.text())

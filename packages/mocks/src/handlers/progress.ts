@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import type { StudentProgress } from '@workspace/core'
 import { currentScenario, db, latency } from '../db'
-import { renatoMeasurements, renatoPhotos } from '../fixtures/renato-progress'
+import { renatoMeasurements } from '../fixtures/renato-progress'
 import { exerciseLibrary, renatoPlan } from '../fixtures/renato-plan'
 import { allSessions } from './workout'
 
@@ -28,7 +28,7 @@ export const progressHandlers = [
       weightGoalKg: 76,
       lifts,
       measurements: isNew ? [] : renatoMeasurements,
-      photos: isNew ? [] : renatoPhotos,
+      photos: isNew ? db.photos.filter((p) => !p.id.startsWith('ph_2026')) : db.photos, // aluno novo: só as que enviou
     })
   }),
 ]
