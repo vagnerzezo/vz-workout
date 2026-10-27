@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react'
 import { createBrowserRouter, type RouteObject } from 'react-router'
 import { AppShell } from './app-shell'
-import { RequireAccess } from './require-access'
+import { RequireAuth } from './require-auth'
 
 const page = (load: () => Promise<{ default: ComponentType }>) => ({
   lazy: async () => ({ Component: (await load()).default }),
@@ -12,11 +12,13 @@ const comingSoon = (title: string) => ({
   handle: { title },
 })
 
-// TODO(etapa 3): RequireAuth, /entrar, /primeiro-acesso e /recuperar-senha (seção 7.3 do guia)
 export const routes: RouteObject[] = [
+  { path: '/entrar', ...page(() => import('../features/auth/pages/login-page')) },
+  { path: '/primeiro-acesso/:code?', ...page(() => import('../features/auth/pages/first-access-page')) },
+  { path: '/recuperar-senha', ...page(() => import('../features/auth/pages/reset-password-page')) },
   { path: '/acesso-pausado', ...page(() => import('../features/profile/pages/paused-page')) },
   {
-    element: <RequireAccess />, // acesso pausado → /acesso-pausado
+    element: <RequireAuth />, // sem sessão → /entrar · acesso pausado → /acesso-pausado
     children: [
       { path: '/treinos/:dayId/ativo', ...page(() => import('../features/workout/pages/active-workout-page')) },
       { path: '/treinos/:sessionId/resumo', ...page(() => import('../features/workout/pages/session-summary-page')) },

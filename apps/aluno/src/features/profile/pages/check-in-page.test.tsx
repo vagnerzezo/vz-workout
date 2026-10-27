@@ -71,7 +71,7 @@ describe('Check-in', () => {
     await user.click(screen.getByRole('button', { name: 'Enviar check-in' }))
 
     await waitFor(() => expect(router.state.location.pathname).toBe('/perfil'), { timeout: 3000 })
-    expect(await screen.findByText('Check-in enviado ao Carlos')).toBeInTheDocument()
+    expect(await screen.findByText('Check-in enviado ao Kaue')).toBeInTheDocument()
     await screen.findByRole('region', { name: 'Seus dados' })
     expect(screen.queryByRole('region', { name: 'Check-in quinzenal' })).not.toBeInTheDocument()
     expect(screen.getByRole('region', { name: 'Objetivo de peso' })).toHaveTextContent('Atual82,3 kg')

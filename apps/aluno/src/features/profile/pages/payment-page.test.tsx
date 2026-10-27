@@ -21,7 +21,7 @@ describe('Pagamento', () => {
     await openPayment()
     expect(plan()).toHaveTextContent('Vence em 55 dias')
     expect(plan()).toHaveTextContent('TrimestralR$ 600,00')
-    expect(plan()).toHaveTextContent('Vence em 15/12 · renova até 15/03/2027 · Carlos Oliveira')
+    expect(plan()).toHaveTextContent('Vence em 15/12 · renova até 15/03/2027 · Kaue Oliveira')
 
     expect(screen.getByRole('img', { name: 'QR Code Pix para pagar R$ 600,00' })).toBeInTheDocument()
     const code = screen.getByRole('status', { name: 'Código Pix copia e cola' }).textContent!
@@ -31,7 +31,7 @@ describe('Pagamento', () => {
 
     const pix = screen.getByRole('region', { name: '1. Pague com Pix' })
     expect(within(pix).getByText('Chave CNPJ').nextElementSibling).toHaveTextContent('12.345.678/0001-90')
-    expect(within(pix).getByText('Recebedor').nextElementSibling).toHaveTextContent('CARLOS OLIVEIRA')
+    expect(within(pix).getByText('Recebedor').nextElementSibling).toHaveTextContent('KAUE OLIVEIRA')
 
     const history = screen.getByRole('region', { name: 'Histórico' })
     expect(within(history).getAllByRole('listitem').map((li) => li.textContent)).toEqual([
@@ -63,7 +63,7 @@ describe('Pagamento', () => {
     expect(within(status).getAllByRole('listitem').map((li) => li.textContent)).toEqual([
       // o nome do arquivo não sobrevive ao FormData do jsdom no Node (chega "blob"); no navegador chega certo
       expect.stringMatching(/^Comprovante enviado.+ · hoje$/),
-      'Em análise pelo CarlosNormalmente em até 1 dia útil',
+      'Em análise pelo KaueNormalmente em até 1 dia útil',
       'Pagamento confirmadoSeu plano é renovado até 15/03/2027 e você recebe uma notificação',
     ])
     expect(screen.queryByRole('region', { name: '1. Pague com Pix' })).not.toBeInTheDocument()
@@ -82,13 +82,13 @@ describe('Pagamento', () => {
       amount: 600,
       dueDate: '2026-12-15',
       renewsUntil: '2027-03-15',
-      pix: { key: '12345678000190', keyLabel: 'Chave CNPJ', keyDisplay: '12.345.678/0001-90', receiver: 'CARLOS OLIVEIRA', city: 'Novo Hamburgo', txid: 'RENATO1512TRI' },
+      pix: { key: '12345678000190', keyLabel: 'Chave CNPJ', keyDisplay: '12.345.678/0001-90', receiver: 'KAUE OLIVEIRA', city: 'Novo Hamburgo', txid: 'RENATO1512TRI' },
       proof: { fileName: 'pix.png', sentAt: '2026-10-20T10:00:00.000Z' },
     }
     server.use(
       http.get('/api/me/billing', () =>
         HttpResponse.json({
-          coachName: 'Carlos Oliveira',
+          coachName: 'Kaue Oliveira',
           charge: { ...charge, status: 'rejected', rejectionReason: 'O valor do comprovante é R$ 60,00.' },
           history: [],
         }),

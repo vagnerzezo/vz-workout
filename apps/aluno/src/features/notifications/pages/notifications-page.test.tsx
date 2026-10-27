@@ -25,7 +25,7 @@ describe('Notificações', () => {
     expect(titles('Hoje')).toEqual([
       expect.stringMatching(/^Não lida: Bora treinar, Renato!19:00/),
       expect.stringMatching(/^Almoço às 12:3012:15/),
-      expect.stringMatching(/^Não lida: Carlos respondeu seu check-in08:12/),
+      expect.stringMatching(/^Não lida: Kaue respondeu seu check-in08:12/),
       expect.stringMatching(/^Não lida: Sua ficha foi atualizada08:11/),
     ])
     expect(titles('Ontem')).toEqual([expect.stringMatching(/^Novo recorde no supino inclinado20:52/), expect.stringMatching(/^Seu check-in está liberado08:00/)])
@@ -37,7 +37,7 @@ describe('Notificações', () => {
   it('abrir uma notificação marca como lida e atualiza o sino da Home', async () => {
     const user = userEvent.setup()
     const { router } = await openInbox()
-    await user.click(screen.getByRole('link', { name: /Carlos respondeu seu check-in/ }))
+    await user.click(screen.getByRole('link', { name: /Kaue respondeu seu check-in/ }))
     await waitFor(() => expect(router.state.location.pathname).toBe('/chat'), { timeout: 3000 })
 
     await router.navigate('/')
@@ -63,7 +63,7 @@ describe('Notificações', () => {
     const sheet = await screen.findByRole('dialog', { name: 'Lembretes' })
     await waitFor(() => expect(within(sheet).getByRole('switch', { name: /^Recordes/ })).toBeChecked())
     expect(within(sheet).getByRole('switch', { name: /^Dia de treino/ })).toHaveAccessibleName(/Nos dias de treino, às 18:00/)
-    expect(sheet).toHaveTextContent('Mensagens do Carlos sempre chegam, mesmo no horário silencioso.')
+    expect(sheet).toHaveTextContent('Mensagens do Kaue sempre chegam, mesmo no horário silencioso.')
 
     await user.click(within(sheet).getByRole('switch', { name: /^Água/ }))
     expect(within(sheet).getByRole('switch', { name: /^Água/ })).toBeChecked()

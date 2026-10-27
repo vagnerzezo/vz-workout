@@ -3,9 +3,12 @@ import type { StudentProfile } from '@workspace/core'
 import { NotificationSettings } from '@workspace/core'
 import { toIsoDate } from '@workspace/core'
 import { currentScenario, db, latency } from '../db'
-import { renatoMe } from '../fixtures/renato'
+import { coachName, renatoMe } from '../fixtures/renato'
 import { pendingCheckIn } from './checkin'
 import { allSessions } from './workout'
+
+const goalLabels = { lose: 'Emagrecimento', gain: 'Hipertrofia', health: 'Saúde e disposição', performance: 'Performance' } as const
+const levelLabels = { beginner: 'Iniciante', intermediate: 'Intermediário', advanced: 'Avançado' } as const
 
 export const profileHandlers = [
   http.get('/api/me/profile', async () => {
@@ -16,14 +19,14 @@ export const profileHandlers = [
     const isNew = scenario === 'novo'
     const checkIn = pendingCheckIn(today)
     return HttpResponse.json<StudentProfile>({
-      fullName: renatoMe.fullName,
+      fullName: db.newStudent?.fullName ?? renatoMe.fullName,
       birthDate: '1993-05-12',
-      goal: 'Hipertrofia',
-      level: 'Intermediário',
+      goal: goalLabels[db.newStudent?.anamnesis?.goal ?? 'gain'],
+      level: levelLabels[db.newStudent?.anamnesis?.experience ?? 'intermediate'],
       memberSince: isNew ? toIsoDate(today) : '2026-06-10',
       totalWorkouts: allSessions(today, isNew || scenario === 'sem-ficha').length,
       streakDays: isNew ? 0 : 3, // o mesmo da Home
-      coach: { name: 'Carlos Oliveira' },
+      coach: { name: coachName },
       subscription: { planLabel: 'trimestral', endsAt: '2026-12-15' },
       checkIn: checkIn && {
         label: checkIn.label,

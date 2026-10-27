@@ -7,7 +7,7 @@ import { formatBRL, initials, parseIsoDate, shortDate } from '@workspace/core'
 import { PixQr } from '@workspace/ui/blocks/pix-qr'
 import { Skeleton } from '@workspace/ui/components/skeleton'
 import { ErrorState } from '../../../shared/components/error-state'
-import { useMe } from '../../../shared/api/me'
+import { isUnauthorized, useMe } from '../../../shared/api/me'
 import { useBilling, useSendProof } from '../api/billing'
 import { CopyPixButton, useChargePayload } from '../components/pix-parts'
 
@@ -16,6 +16,7 @@ export default function PausedPage() {
   const me = useMe()
   const billing = useBilling()
 
+  if (isUnauthorized(me.error)) return <Navigate to="/entrar" replace />
   if (me.data?.access === 'active') return <Navigate to="/" replace />
 
   const appName = me.data?.branding.appName ?? ''

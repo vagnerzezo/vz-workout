@@ -3,6 +3,7 @@ import { subDays } from 'date-fns'
 import type { Billing } from '@workspace/core'
 import { toIsoDate } from '@workspace/core'
 import { currentScenario, db, latency } from '../db'
+import { coachName } from '../fixtures/renato'
 import { renatoPayments } from '../fixtures/renato-billing'
 
 const MAX_BYTES = 10 * 1024 * 1024
@@ -12,7 +13,7 @@ export const billingHandlers = [
     await latency()
     if (currentScenario() === 'erro') return HttpResponse.json({ message: 'Erro simulado' }, { status: 500 })
     return HttpResponse.json<Billing>({
-      coachName: 'Carlos Oliveira',
+      coachName,
       // Cenário pausado: a mesma cobrança, vencida há 6 dias
       charge: db.charge && currentScenario() === 'pausado' ? { ...db.charge, dueDate: toIsoDate(subDays(new Date(), 6)) } : db.charge,
       history: currentScenario() === 'novo' ? [] : renatoPayments,

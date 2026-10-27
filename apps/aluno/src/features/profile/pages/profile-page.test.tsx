@@ -26,10 +26,10 @@ describe('Perfil', () => {
 
     const checkIn = region('Check-in quinzenal')
     expect(checkIn).toHaveTextContent('Vence em 2 dias')
-    expect(checkIn).toHaveTextContent('Envie 3 fotos e responda 6 perguntas para o Carlos ajustar o próximo bloco.')
+    expect(checkIn).toHaveTextContent('Envie 3 fotos e responda 6 perguntas para o Kaue ajustar o próximo bloco.')
     expect(within(checkIn).getByRole('link', { name: 'Fazer check-in' })).toHaveAttribute('href', '/perfil/check-in')
 
-    expect(region('Seu treinador')).toHaveTextContent('Carlos OliveiraSeu treinador · plano trimestral até 15/12')
+    expect(region('Seu treinador')).toHaveTextContent('Kaue OliveiraSeu treinador · plano trimestral até 15/12')
     expect(screen.getByRole('link', { name: 'Conversar com o treinador' })).toHaveAttribute('href', '/chat')
 
     const weight = region('Objetivo de peso')

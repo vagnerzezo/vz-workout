@@ -1,13 +1,14 @@
 import { addDays } from 'date-fns'
 import type { PendingCheckIn } from '@workspace/core'
 import { toIsoDate } from '@workspace/core'
+import { coachName } from './renato'
 
 /** Check-in quinzenal do Renato: vence sempre daqui a 2 dias, como no canvas. */
 export const renatoCheckIn = (today: Date, lastWeightKg: number | null): PendingCheckIn => ({
   id: 'ci_quinzenal_2',
   label: 'Check-in quinzenal',
   dueDate: toIsoDate(addDays(today, 2)),
-  coachName: 'Carlos Oliveira',
+  coachName,
   poses: ['front', 'side', 'back'],
   questions: [
     { id: 'energia', label: 'Energia no dia a dia' },

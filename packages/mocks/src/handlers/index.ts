@@ -1,3 +1,4 @@
+import { authHandlers } from './auth'
 import { billingHandlers } from './billing'
 import { chatHandlers } from './chat'
 import { checkInHandlers } from './checkin'
@@ -9,6 +10,7 @@ import { progressHandlers } from './progress'
 import { shoppingHandlers } from './shopping'
 import { workoutHandlers } from './workout'
 
-export const handlers = [...homeHandlers, ...waterHandlers, ...dietHandlers, ...shoppingHandlers, ...workoutHandlers, ...profileHandlers, ...progressHandlers, ...checkInHandlers, ...billingHandlers, ...notificationHandlers, ...chatHandlers]
+// authHandlers primeiro: o 401 sem sessão vale para todas as rotas /api/me
+export const handlers = [...authHandlers, ...homeHandlers, ...waterHandlers, ...dietHandlers, ...shoppingHandlers, ...workoutHandlers, ...profileHandlers, ...progressHandlers, ...checkInHandlers, ...billingHandlers, ...notificationHandlers, ...chatHandlers]
 
 export { resetDb, setLatency, setScenario, type Scenario } from '../db'

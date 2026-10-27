@@ -1,9 +1,10 @@
 import { http, HttpResponse } from 'msw'
 import type { Conversation, Message, MessageBody } from '@workspace/core'
 import { currentScenario, db, latency, newId } from '../db'
+import { coachName } from '../fixtures/renato'
 import { renatoConversation } from '../fixtures/renato-chat'
 
-const coach = { name: 'Carlos Oliveira', responseTime: 'responde em até 2 h' }
+const coach = { name: coachName, responseTime: 'responde em até 2 h' }
 
 export function conversation(now: Date): Message[] {
   const base = currentScenario() === 'novo' ? [] : renatoConversation(now)

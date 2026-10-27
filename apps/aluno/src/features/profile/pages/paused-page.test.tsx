@@ -14,9 +14,9 @@ describe('Acesso pausado', () => {
 
     const pay = screen.getByRole('region', { name: 'Pagamento' })
     expect(pay).toHaveTextContent('Plano TrimestralR$ 600,00')
-    expect(within(pay).getByRole('img', { name: 'QR Code Pix de R$ 600,00 para Carlos Oliveira' })).toBeInTheDocument()
-    expect(pay).toHaveTextContent('Recebedor: CARLOS OLIVEIRA · CNPJ 12.345.678/0001-90')
-    expect(screen.getByRole('link', { name: 'Falar com o Carlos' })).toHaveAttribute('href', '/chat')
+    expect(within(pay).getByRole('img', { name: 'QR Code Pix de R$ 600,00 para Kaue Oliveira' })).toBeInTheDocument()
+    expect(pay).toHaveTextContent('Recebedor: KAUE OLIVEIRA · CNPJ 12.345.678/0001-90')
+    expect(screen.getByRole('link', { name: 'Falar com o Kaue' })).toHaveAttribute('href', '/chat')
     expect(screen.queryByRole('navigation', { name: /Navegação/ })).not.toBeInTheDocument()
   })
 
@@ -39,7 +39,7 @@ describe('Acesso pausado', () => {
     await user.upload(await screen.findByLabelText('Já paguei · enviar comprovante'), new File(['pix'], 'pix.png', { type: 'image/png' }))
 
     const sent = await screen.findByRole('region', { name: 'Comprovante enviado' })
-    expect(sent).toHaveTextContent('O Carlos confere e libera seu acesso. Costuma levar menos de 2 horas em dias úteis.')
+    expect(sent).toHaveTextContent('O Kaue confere e libera seu acesso. Costuma levar menos de 2 horas em dias úteis.')
     expect(screen.queryByLabelText('Já paguei · enviar comprovante')).not.toBeInTheDocument()
     expect(screen.getByRole('region', { name: 'Pagamento' })).toBeInTheDocument() // o Pix continua à mão
   })

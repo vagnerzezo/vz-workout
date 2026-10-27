@@ -8,7 +8,7 @@ const log = () => screen.getByRole('log', { name: 'Mensagens' })
 
 async function openChat() {
   const utils = renderApp('/chat')
-  await screen.findByRole('heading', { level: 1, name: 'Carlos Oliveira' })
+  await screen.findByRole('heading', { level: 1, name: 'Kaue Oliveira' })
   return utils
 }
 
@@ -22,7 +22,7 @@ describe('Chat', () => {
     expect(within(log()).getByText('Hoje')).toBeInTheDocument()
 
     expect(within(log()).getByRole('link', { name: /Você concluiu o Treino C — Legs/ })).toHaveAttribute('href', '/treinos/historico?dia=2026-10-20')
-    expect(within(log()).getByRole('link', { name: /Carlos atualizou sua ficha/ })).toHaveAttribute('href', '/treinos')
+    expect(within(log()).getByRole('link', { name: /Kaue atualizou sua ficha/ })).toHaveAttribute('href', '/treinos')
     expect(within(log()).getByText('Obrigado por avisar. Doeu na descida ou na subida?').closest('div')).toHaveTextContent('Treinador:')
     expect(within(log()).getByText('Na descida, quando passa da paralela.').parentElement?.nextElementSibling).toHaveTextContent('21:44 · Lida')
     expect(within(log()).getByRole('button', { name: 'Áudio de 0:42 (indisponível)' })).toBeDisabled()
@@ -49,7 +49,7 @@ describe('Chat', () => {
     const user = userEvent.setup()
     await openChat()
     await user.click(screen.getByRole('button', { name: 'Não vou conseguir treinar hoje' }))
-    expect(screen.getByRole('textbox', { name: 'Mensagem' })).toHaveValue('Carlos, hoje não vou conseguir treinar. Posso repor amanhã?')
+    expect(screen.getByRole('textbox', { name: 'Mensagem' })).toHaveValue('Kaue, hoje não vou conseguir treinar. Posso repor amanhã?')
     expect(screen.getByRole('button', { name: 'Enviar mensagem' })).toBeInTheDocument()
   })
 
@@ -92,7 +92,7 @@ describe('Chat', () => {
     const { router } = renderApp('/')
     expect(await screen.findByRole('link', { name: 'Mensagens do treinador, há mensagens novas' })).toBeInTheDocument()
     await router.navigate('/chat')
-    await screen.findByRole('heading', { level: 1, name: 'Carlos Oliveira' })
+    await screen.findByRole('heading', { level: 1, name: 'Kaue Oliveira' })
     await router.navigate('/')
     expect(await screen.findByRole('link', { name: 'Mensagens do treinador' })).toBeInTheDocument()
   })
@@ -100,6 +100,6 @@ describe('Chat', () => {
   it('aluno novo: convite para a primeira mensagem', async () => {
     setScenario('novo')
     renderApp('/chat')
-    expect(await screen.findByText('Mande sua primeira mensagem para o Carlos: dúvidas, dores, fotos da refeição.')).toBeInTheDocument()
+    expect(await screen.findByText('Mande sua primeira mensagem para o Kaue: dúvidas, dores, fotos da refeição.')).toBeInTheDocument()
   })
 })

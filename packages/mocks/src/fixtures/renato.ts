@@ -2,6 +2,10 @@ import type { HomeSummary, Me, WaterLog, WeeklyActivity, WeekDay, WorkoutPlan } 
 import { estimateDuration, toIsoDate, workoutForDate } from '@workspace/core'
 import { getISODay } from 'date-fns'
 
+/** O personal do Renato. Para trocar o nome do treinador na API simulada, mude só aqui. */
+export const coachName = 'Kaue Oliveira'
+export const coachFirstName = coachName.split(' ')[0]!
+
 export const renatoMe: Me = {
   id: 'stu_renato',
   firstName: 'Renato',

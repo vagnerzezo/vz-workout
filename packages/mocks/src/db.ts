@@ -1,7 +1,8 @@
 import { delay } from 'msw'
-import type { Charge, DietDay, LoggedSet, Message, NotificationSettings, ProgressPhoto, ShoppingListState, WaterLog, WeightEntry, WorkoutSession } from '@workspace/core'
+import type { Anamnesis, Charge, DietDay, LoggedSet, Message, NotificationSettings, ProgressPhoto, ShoppingListState, WaterLog, WeightEntry, WorkoutSession } from '@workspace/core'
 import { toIsoDate } from '@workspace/core'
 import { initialWater, mondayOf, type FinishedSession } from './fixtures/renato'
+import { renatoLogin } from './fixtures/renato-auth'
 import { renatoCharge } from './fixtures/renato-billing'
 import { initialWeights, renatoPhotos } from './fixtures/renato-progress'
 
@@ -29,7 +30,33 @@ type Db = {
   sentMessages: Message[]
   /** O aluno já abriu a conversa (some a bolinha do chat na Home) */
   chatOpened: boolean
+  /** Sessão do aluno (no app real é um cookie httpOnly) */
+  loggedIn: boolean
+  password: string
+  loginAttempts: number
+  recovery: { login: string; attempts: number; token: string | null } | null
+  /** Quem aceitou o convite (primeiro acesso): a API passa a responder como aluna nova */
+  newStudent: { fullName: string; anamnesis: Anamnesis | null } | null
   nextId: number
+}
+
+const SESSION_KEY = 'mock-sessao'
+
+function readSession(): boolean {
+  try {
+    return globalThis.localStorage?.getItem(SESSION_KEY) !== 'fora'
+  } catch {
+    return true
+  }
+}
+
+function writeSession(on: boolean) {
+  try {
+    if (on) globalThis.localStorage?.removeItem(SESSION_KEY)
+    else globalThis.localStorage?.setItem(SESSION_KEY, 'fora')
+  } catch {
+    // localStorage bloqueado: a sessão fica só na memória
+  }
 }
 
 const initial = (): Db => ({
@@ -46,13 +73,25 @@ const initial = (): Db => ({
   unreadNotifications: ['n1', 'n2', 'n3'], // como no canvas: 3 não lidas
   sentMessages: [],
   chatOpened: false,
+  loggedIn: readSession(),
+  password: renatoLogin.password,
+  loginAttempts: 0,
+  recovery: null,
+  newStudent: null,
   nextId: 1,
 })
 
 export const db: Db = initial()
 
 export function resetDb() {
+  writeSession(true)
   Object.assign(db, initial())
+}
+
+/** Entrar/sair. Fica guardado no navegador para recarregar a página não deslogar. */
+export function setLoggedIn(on: boolean) {
+  db.loggedIn = on
+  writeSession(on)
 }
 
 export const newId = (prefix: string) => `${prefix}_${db.nextId++}`
@@ -78,6 +117,7 @@ const known: Scenario[] = ['padrao', 'descanso', 'novo', 'sem-ficha', 'pausado',
  */
 export function currentScenario(): Scenario {
   if (forced) return forced
+  if (db.newStudent) return 'novo' // acabou de fazer o primeiro acesso
   const param = known.find((s) => s === new URLSearchParams(globalThis.location?.search ?? '').get('cenario'))
   try {
     if (param) globalThis.sessionStorage?.setItem('cenario', param)

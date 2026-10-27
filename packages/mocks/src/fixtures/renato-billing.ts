@@ -1,4 +1,5 @@
 import type { Billing, Charge } from '@workspace/core'
+import { coachName } from './renato'
 
 /** Renovação do plano trimestral, como no canvas: vence junto com o plano (15/12). */
 export const renatoCharge = (): Charge => ({
@@ -12,7 +13,7 @@ export const renatoCharge = (): Charge => ({
     key: '12345678000190',
     keyLabel: 'Chave CNPJ',
     keyDisplay: '12.345.678/0001-90',
-    receiver: 'CARLOS OLIVEIRA',
+    receiver: coachName.toUpperCase(),
     city: 'Novo Hamburgo',
     txid: 'RENATO1512TRI',
   },

@@ -38,7 +38,9 @@ export const homeHandlers = [
     await latency()
     // Pausado até a cobrança vencida ser paga (o comprovante enviado ainda espera o treinador)
     const paused = currentScenario() === 'pausado' && db.charge?.status !== 'paid'
-    return HttpResponse.json<Me>({ ...renatoMe, access: paused ? 'paused' : 'active' })
+    const name = db.newStudent?.fullName
+    const who = name ? { id: 'stu_novo', fullName: name, firstName: name.split(' ')[0]! } : {}
+    return HttpResponse.json<Me>({ ...renatoMe, ...who, access: paused ? 'paused' : 'active' })
   }),
 
   http.get('/api/me/home', async () => {

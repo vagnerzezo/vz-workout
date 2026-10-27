@@ -1,12 +1,13 @@
 import { useId, useState, type ReactNode } from 'react'
-import { Link } from 'react-router'
-import { ChevronLeft, ChevronRight, Share, Smartphone } from 'lucide-react'
+import { Link, useNavigate } from 'react-router'
+import { ChevronLeft, ChevronRight, LogOut, Share, Smartphone } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { NotificationSettings } from '@workspace/core'
 import { parseIsoDate, shortDate, syncedLabel } from '@workspace/core'
 import { Switch } from '@workspace/ui/components/switch'
 import { cn } from '@workspace/ui/lib/utils'
+import { useLogout } from '../../auth/api/session'
 import { downloadPlanForOffline } from '../../workout/api/offline'
 import { useActiveWorkout } from '../../workout/store/active-workout'
 import { install, isIos, useInstall } from '../../../shared/pwa/install'
@@ -56,8 +57,10 @@ export default function SettingsPage() {
         <LinkRow to="/perfil/configuracoes/termos" label="Termos e privacidade" />
       </Group>
 
-      {/* TODO(etapa 3): "Sair do aplicativo" junto com o login (/entrar) */}
-      <p className="text-center text-xs text-muted-foreground">Versão {__APP_VERSION__}</p>
+      <div className="flex flex-col items-center gap-1.5">
+        <LogoutButton />
+        <p className="text-xs text-muted-foreground">Versão {__APP_VERSION__}</p>
+      </div>
     </main>
   )
 }
@@ -209,5 +212,26 @@ function OfflineGroup() {
     <Group title="Offline">
       <SwitchRow label="Baixar ficha atual" hint={hint} checked={prefs.offlinePlan} onChange={toggle} />
     </Group>
+  )
+}
+
+function LogoutButton() {
+  const navigate = useNavigate()
+  const logout = useLogout()
+  return (
+    <button
+      type="button"
+      disabled={logout.isPending}
+      onClick={() =>
+        logout.mutate(undefined, {
+          onSuccess: () => navigate('/entrar', { replace: true }),
+          onError: () => toast.error('Não foi possível sair agora. Tente de novo.'),
+        })
+      }
+      className="flex h-13 w-full items-center justify-center gap-2 rounded-full border border-line-strong text-[15px] font-extrabold outline-none hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50"
+    >
+      <LogOut aria-hidden="true" className="size-4.5" strokeWidth={2} />
+      Sair do aplicativo
+    </button>
   )
 }
