@@ -13,5 +13,7 @@ export const Me = z.object({
   firstName: z.string(),
   fullName: z.string(),
   branding: Branding,
+  /** paused: cobrança vencida; o app só libera o pagamento, o chat e o progresso */
+  access: z.enum(['active', 'paused']),
 })
 export type Me = z.infer<typeof Me>

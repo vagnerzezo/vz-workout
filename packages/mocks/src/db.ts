@@ -50,9 +50,9 @@ export const newId = (prefix: string) => `${prefix}_${db.nextId++}`
 
 /**
  * Cenários para ver os estados que o design previu: abra o app com `?cenario=descanso`,
- * `?cenario=novo` (aluno recém-cadastrado), `?cenario=sem-ficha` ou `?cenario=erro`.
+ * `?cenario=novo` (aluno recém-cadastrado), `?cenario=sem-ficha`, `?cenario=pausado` (cobrança vencida) ou `?cenario=erro`.
  */
-export type Scenario = 'padrao' | 'descanso' | 'novo' | 'sem-ficha' | 'erro'
+export type Scenario = 'padrao' | 'descanso' | 'novo' | 'sem-ficha' | 'pausado' | 'erro'
 
 let forced: Scenario | null = null
 
@@ -61,11 +61,21 @@ export function setScenario(s: Scenario | null) {
   forced = s
 }
 
+const known: Scenario[] = ['padrao', 'descanso', 'novo', 'sem-ficha', 'pausado', 'erro']
+
+/**
+ * O `?cenario=` da URL fica guardado na aba (sessionStorage): ao navegar pelo app o parâmetro some,
+ * mas o cenário continua. `?cenario=padrao` volta ao normal.
+ */
 export function currentScenario(): Scenario {
   if (forced) return forced
-  const param = new URLSearchParams(globalThis.location?.search ?? '').get('cenario')
-  const known: Scenario[] = ['descanso', 'novo', 'sem-ficha', 'erro']
-  return known.find((s) => s === param) ?? 'padrao'
+  const param = known.find((s) => s === new URLSearchParams(globalThis.location?.search ?? '').get('cenario'))
+  try {
+    if (param) globalThis.sessionStorage?.setItem('cenario', param)
+    return param ?? known.find((s) => s === globalThis.sessionStorage?.getItem('cenario')) ?? 'padrao'
+  } catch {
+    return param ?? 'padrao' // sessionStorage bloqueado
+  }
 }
 
 /** Latência realista: força a tela a desenhar o estado de carregamento. Nos testes, use 0. */

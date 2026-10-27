@@ -1,15 +1,16 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
-import { Check, ChevronLeft, Copy, Upload } from 'lucide-react'
+import { Check, ChevronLeft, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Billing, Charge } from '@workspace/core'
-import { dueLabel, formatBRL, parseIsoDate, pixPayload, relativeDay, shortDate, toIsoDate } from '@workspace/core'
+import { dueLabel, formatBRL, parseIsoDate, relativeDay, shortDate, toIsoDate } from '@workspace/core'
 import { PixQr } from '@workspace/ui/blocks/pix-qr'
 import { Button } from '@workspace/ui/components/button'
 import { Skeleton } from '@workspace/ui/components/skeleton'
 import { cn } from '@workspace/ui/lib/utils'
 import { ErrorState } from '../../../shared/components/error-state'
 import { useBilling, useSendProof } from '../api/billing'
+import { CopyPixButton, useChargePayload } from '../components/pix-parts'
 
 const iconButton =
   'flex size-11 shrink-0 items-center justify-center rounded-full border bg-card outline-none hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50'
@@ -103,18 +104,8 @@ function ChargeFlow({ charge, coachName, today }: { charge: Charge; coachName: s
 }
 
 function PixSection({ charge }: { charge: Charge }) {
-  const [copied, setCopied] = useState(false)
   const { pix } = charge
-  const payload = useMemo(
-    () => pixPayload({ key: pix.key, name: pix.receiver, city: pix.city, amount: charge.amount, txid: pix.txid }),
-    [pix, charge.amount],
-  )
-
-  const copy = () =>
-    navigator.clipboard
-      .writeText(payload)
-      .then(() => setCopied(true))
-      .catch(() => toast.error('Não foi possível copiar. Toque e segure o código para copiar.'))
+  const payload = useChargePayload(charge)
 
   return (
     <section aria-labelledby="pix" className="flex flex-col gap-3">
@@ -130,17 +121,7 @@ function PixSection({ charge }: { charge: Charge }) {
         <output aria-label="Código Pix copia e cola" className="max-h-13 overflow-hidden rounded-xl border bg-card px-3 py-2.5 font-mono text-[11px] leading-normal break-all text-muted-foreground select-all">
           {payload}
         </output>
-        <button
-          type="button"
-          onClick={copy}
-          className={cn(
-            'flex h-12.5 items-center justify-center gap-2 rounded-full text-[15px] font-extrabold outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
-            copied ? 'bg-primary/14 text-primary' : 'bg-primary text-primary-foreground',
-          )}
-        >
-          {copied ? <Check aria-hidden="true" className="size-4.5" strokeWidth={2.4} /> : <Copy aria-hidden="true" className="size-4.5" strokeWidth={2} />}
-          {copied ? 'Código copiado' : 'Copiar código Pix'}
-        </button>
+        <CopyPixButton payload={payload} />
       </div>
       <dl className="rounded-[14px] border bg-card px-3.5 py-1 text-[13px]">
         {[

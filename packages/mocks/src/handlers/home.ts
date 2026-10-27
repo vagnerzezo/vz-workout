@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw'
-import type { HomeSummary } from '@workspace/core'
+import type { HomeSummary, Me } from '@workspace/core'
 import { toIsoDate } from '@workspace/core'
 import { currentScenario, db, finishedThisWeek, latency, newId } from '../db'
 import { renatoHome, renatoMe } from '../fixtures/renato'
@@ -34,7 +34,9 @@ function homeFor(today: Date): HomeSummary {
 export const homeHandlers = [
   http.get('/api/me', async () => {
     await latency()
-    return HttpResponse.json(renatoMe)
+    // Pausado até a cobrança vencida ser paga (o comprovante enviado ainda espera o treinador)
+    const paused = currentScenario() === 'pausado' && db.charge?.status !== 'paid'
+    return HttpResponse.json<Me>({ ...renatoMe, access: paused ? 'paused' : 'active' })
   }),
 
   http.get('/api/me/home', async () => {

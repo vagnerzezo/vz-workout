@@ -7,6 +7,7 @@ export const renatoMe: Me = {
   firstName: 'Renato',
   fullName: 'Renato Alves',
   branding: { appName: 'Team Oliveira', brandColor: '#A3FF12' },
+  access: 'active',
 }
 
 /** Segunda-feira da semana de `today` */
