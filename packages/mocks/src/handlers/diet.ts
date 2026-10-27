@@ -36,7 +36,7 @@ export function dietDayFor(plan: MealPlan, iso: string, today: Date): DietDay {
     if (iso === todayIso) done = variant.meals.slice(0, 3).map((m) => m.id)
     else if (iso < todayIso) done = variant.meals.filter((_, i) => getISODay(date) % 2 === 0 || i < variant.meals.length - 1).map((m) => m.id)
   }
-  return { date: iso, variantId: variant.id, doneMealIds: done }
+  return { date: iso, variantId: variant.id, doneMealIds: done, swaps: {} }
 }
 
 /** "Nutrição de hoje" e "Próxima refeição" da Home, a partir da dieta do dia. */
@@ -48,7 +48,7 @@ export function homeNutrition(today: Date): Pick<HomeSummary, 'nutrition' | 'nex
   }
   const day = dietDayFor(plan, toIsoDate(today), today)
   const variant = variantById(plan, day.variantId)
-  const totals = dayTotals(variant.meals, day.doneMealIds)
+  const totals = dayTotals(variant.meals, day.doneMealIds, day.swaps)
   const next = nextPendingMeal(variant.meals, day.doneMealIds)
   return {
     nutrition: {
@@ -57,7 +57,7 @@ export function homeNutrition(today: Date): Pick<HomeSummary, 'nutrition' | 'nex
       carbs: { consumed: totals.carbs, goal: variant.goals.carbs },
       fat: { consumed: totals.fat, goal: variant.goals.fat },
     },
-    nextMeal: next && { id: next.id, name: next.name, time: next.time, foodCount: next.foods.length, kcal: mealTotals(next).kcal },
+    nextMeal: next && { id: next.id, name: next.name, time: next.time, foodCount: next.foods.length, kcal: mealTotals(next, day.swaps[next.id]).kcal },
   }
 }
 
@@ -76,7 +76,7 @@ export const dietHandlers = [
       if (!plan || date > toIsoDate(today)) return { date, percent: null }
       const day = dietDayFor(plan, date, today)
       const variant = variantById(plan, day.variantId)
-      return { date, percent: percentOf(dayTotals(variant.meals, day.doneMealIds).kcal, variant.goals.kcal) }
+      return { date, percent: percentOf(dayTotals(variant.meals, day.doneMealIds, day.swaps).kcal, variant.goals.kcal) }
     })
     return HttpResponse.json<StudentDiet>({ plan, day: plan && dietDayFor(plan, iso, today), week })
   }),
@@ -107,6 +107,27 @@ export const dietHandlers = [
     const mealId = String(params.mealId)
     const rest = day.doneMealIds.filter((id) => id !== mealId)
     db.dietDays[iso] = { ...day, doneMealIds: done ? [...rest, mealId] : rest }
+    return HttpResponse.json<DietDay>(db.dietDays[iso])
+  }),
+
+  // Troca um alimento da refeição por uma das substituições da nutri; substituteId null volta ao original
+  http.put('/api/me/diet/days/:date/meals/:mealId/foods/:foodId', async ({ params, request }) => {
+    const plan = currentDiet()
+    const iso = isoParam(String(params.date))
+    const { substituteId } = (await request.json()) as { substituteId: string | null }
+    if (!plan || !iso) return HttpResponse.json({ message: 'Dia inválido' }, { status: 422 })
+    const day = dietDayFor(plan, iso, new Date())
+    const mealId = String(params.mealId)
+    const foodId = String(params.foodId)
+    const food = variantById(plan, day.variantId).meals.find((m) => m.id === mealId)?.foods.find((f) => f.foodId === foodId)
+    if (!food) return HttpResponse.json({ message: 'Alimento não encontrado' }, { status: 404 })
+    if (substituteId !== null && !food.substitutes.some((s) => s.foodId === substituteId)) {
+      return HttpResponse.json({ message: 'Substituição não liberada pela nutri' }, { status: 422 })
+    }
+    await latency()
+    const others = Object.fromEntries(Object.entries(day.swaps[mealId] ?? {}).filter(([id]) => id !== foodId))
+    const mealSwaps = substituteId ? { ...others, [foodId]: substituteId } : others
+    db.dietDays[iso] = { ...day, swaps: { ...day.swaps, [mealId]: mealSwaps } }
     return HttpResponse.json<DietDay>(db.dietDays[iso])
   }),
 ]

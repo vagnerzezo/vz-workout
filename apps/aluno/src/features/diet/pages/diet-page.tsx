@@ -59,10 +59,11 @@ export default function DietPage() {
             value={variant.id}
             onChange={(id) => chooseVariant.mutate(id, { onError: () => toast.error('Não foi possível trocar a ficha. Tente de novo.') })}
           />
-          <DayBalance totals={dayTotals(variant.meals, day.doneMealIds)} goals={variant.goals} isToday={isToday} />
+          <DayBalance totals={dayTotals(variant.meals, day.doneMealIds, day.swaps)} goals={variant.goals} isToday={isToday} />
           <MealTimeline
             meals={variant.meals}
             doneIds={day.doneMealIds}
+            swaps={day.swaps}
             nextId={isToday ? (nextPendingMeal(variant.meals, day.doneMealIds)?.id ?? null) : null}
             date={date}
             canCheck={date <= todayIso}

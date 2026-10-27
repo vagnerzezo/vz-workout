@@ -59,3 +59,16 @@ export function useChooseVariant(date: string) {
     (day, variantId) => ({ ...day, variantId }),
   )
 }
+
+/** Escolhe uma substituição para o alimento; null volta ao que a nutri prescreveu. */
+export function useSwapFood(date: string) {
+  return useDietDayMutation(
+    date,
+    ({ mealId, foodId, substituteId }: { mealId: string; foodId: string; substituteId: string | null }) =>
+      api(`/me/diet/days/${date}/meals/${mealId}/foods/${foodId}`, DietDay, { method: 'PUT', body: JSON.stringify({ substituteId }) }),
+    (day, { mealId, foodId, substituteId }) => {
+      const others = Object.fromEntries(Object.entries(day.swaps[mealId] ?? {}).filter(([id]) => id !== foodId))
+      return { ...day, swaps: { ...day.swaps, [mealId]: substituteId ? { ...others, [foodId]: substituteId } : others } }
+    },
+  )
+}

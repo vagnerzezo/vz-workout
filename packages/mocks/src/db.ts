@@ -1,5 +1,5 @@
 import { delay } from 'msw'
-import type { DietDay, LoggedSet, WaterLog, WeightEntry, WorkoutSession } from '@workspace/core'
+import type { DietDay, LoggedSet, ShoppingListState, WaterLog, WeightEntry, WorkoutSession } from '@workspace/core'
 import { toIsoDate } from '@workspace/core'
 import { initialWater, mondayOf, type FinishedSession } from './fixtures/renato'
 
@@ -12,6 +12,8 @@ type Db = {
   sessions: WorkoutSession[]
   /** Dias da dieta que o aluno já mexeu (ficha escolhida, refeições concluídas), por data */
   dietDays: Record<string, DietDay>
+  /** Lista de compras: o que já foi comprado e os itens fora do plano */
+  shopping: ShoppingListState
   nextId: number
 }
 
@@ -21,6 +23,7 @@ const initial = (): Db => ({
   liveSets: {},
   sessions: [],
   dietDays: {},
+  shopping: { checkedIds: ['banana', 'ovos', 'arroz_branco'], extras: [] }, // como no canvas: 3 itens já comprados
   nextId: 1,
 })
 

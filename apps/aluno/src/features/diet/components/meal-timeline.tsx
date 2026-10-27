@@ -1,19 +1,20 @@
 import { Link } from 'react-router'
 import { Check } from 'lucide-react'
-import type { Meal } from '@workspace/core'
+import type { Meal, MealSwaps } from '@workspace/core'
 import { formatInt, mealTotals } from '@workspace/core'
 import { cn } from '@workspace/ui/lib/utils'
 
 type MealTimelineProps = {
   meals: Meal[]
   doneIds: string[]
+  swaps: Record<string, MealSwaps>
   nextId: string | null // só no dia de hoje
   date: string
   canCheck: boolean // dias futuros: só leitura
   onToggle: (mealId: string, done: boolean) => void
 }
 
-export function MealTimeline({ meals, doneIds, nextId, date, canCheck, onToggle }: MealTimelineProps) {
+export function MealTimeline({ meals, doneIds, swaps, nextId, date, canCheck, onToggle }: MealTimelineProps) {
   const done = new Set(doneIds)
   return (
     <section aria-labelledby="refeicoes" className="flex flex-col gap-1">
@@ -30,7 +31,7 @@ export function MealTimeline({ meals, doneIds, nextId, date, canCheck, onToggle 
           const isDone = done.has(meal.id)
           const isNext = meal.id === nextId
           const prevDone = i > 0 && done.has(meals[i - 1]!.id)
-          const t = mealTotals(meal)
+          const t = mealTotals(meal, swaps[meal.id])
           return (
             <li key={meal.id} className="grid grid-cols-[44px_18px_minmax(0,1fr)] gap-x-2">
               <span className={cn('pt-5.5 text-[13px] font-bold', isNext ? 'text-primary' : isDone ? 'text-foreground-2' : 'text-muted-foreground')}>

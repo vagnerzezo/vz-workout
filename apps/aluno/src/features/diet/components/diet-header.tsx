@@ -38,7 +38,7 @@ export function DietHeader({ plan }: { plan: MealPlan | null }) {
                 <FileText aria-hidden="true" className="size-5" strokeWidth={1.8} />
               </DrawerTrigger>
               <DrawerContent className="mx-auto max-w-[430px] rounded-t-[26px] pb-[env(safe-area-inset-bottom)]">
-                <DrawerHeader className="flex-row items-center justify-between gap-3 pt-5 text-left">
+                <DrawerHeader className="flex-row items-center justify-between gap-3 pt-5 text-left group-data-[swipe-axis=y]/drawer-popup:text-left">
                   <div className="flex flex-col gap-0.5">
                     <DrawerTitle className="text-lg font-extrabold">{notesTitle[plan.authorRole]}</DrawerTitle>
                     <DrawerDescription>Válidas para todas as fichas da sua dieta.</DrawerDescription>

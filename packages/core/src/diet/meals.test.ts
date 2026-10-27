@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { dayTotals, mealTotals, nextPendingMeal, percentOf } from './meals'
+import { chosenSubstitute, dayTotals, mealTotals, nextPendingMeal, percentOf } from './meals'
 
 const food = (kcal: number, protein: number, carbs: number, fat: number) => ({
   foodId: 'f', name: 'x', portion: '1', kcal, protein, carbs, fat,
@@ -21,6 +21,27 @@ describe('totais de refeição e do dia', () => {
   it('o dia só conta as refeições concluídas', () => {
     expect(dayTotals([breakfast, lunch, dinner], ['cafe', 'jantar'])).toEqual({ kcal: 900, protein: 68, carbs: 98, fat: 26 })
     expect(dayTotals([breakfast], [])).toEqual({ kcal: 0, protein: 0, carbs: 0, fat: 0 })
+  })
+})
+
+describe('substituições', () => {
+  // Pré-treino do canvas: tapioca trocada por cuscuz
+  const tapioca = { ...food(140, 0, 34, 0), foodId: 'tapioca', substitutes: [{ ...food(136, 3, 30, 1), foodId: 'cuscuz' }] }
+  const pre = { id: 'pre', foods: [tapioca, food(60, 12, 1, 1)] }
+
+  it('a refeição soma o substituto escolhido no lugar do original', () => {
+    expect(mealTotals(pre)).toEqual({ kcal: 200, protein: 12, carbs: 35, fat: 1 })
+    expect(mealTotals(pre, { tapioca: 'cuscuz' })).toEqual({ kcal: 196, protein: 15, carbs: 31, fat: 2 })
+  })
+
+  it('o dia usa as substituições de cada refeição', () => {
+    expect(dayTotals([breakfast, pre], ['cafe', 'pre'], { pre: { tapioca: 'cuscuz' } }).kcal).toBe(616)
+  })
+
+  it('substituto que não está mais na ficha volta ao original', () => {
+    expect(chosenSubstitute(tapioca, { tapioca: 'pao_frances' })).toBeNull()
+    expect(chosenSubstitute(tapioca, { tapioca: 'cuscuz' })?.foodId).toBe('cuscuz')
+    expect(mealTotals(pre, { tapioca: 'pao_frances' }).kcal).toBe(200)
   })
 })
 

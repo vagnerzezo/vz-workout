@@ -16,6 +16,8 @@ export const routes: RouteObject[] = [
   { path: '/treinos/:dayId/ativo', ...page(() => import('../features/workout/pages/active-workout-page')) },
   { path: '/treinos/:sessionId/resumo', ...page(() => import('../features/workout/pages/session-summary-page')) },
   { path: '/treinos/historico', ...page(() => import('../features/workout/pages/history-page')) },
+  { path: '/dieta/lista-de-compras', ...page(() => import('../features/diet/pages/shopping-list-page')) },
+  { path: '/dieta/refeicoes/:mealId', ...page(() => import('../features/diet/pages/meal-page')) },
   {
     element: <AppShell />, // BottomNav
     children: [
@@ -24,8 +26,6 @@ export const routes: RouteObject[] = [
       { path: 'chat', ...comingSoon('Chat') },
       { path: 'treinos', ...page(() => import('../features/workout/pages/workout-list-page')) },
       { path: 'dieta', ...page(() => import('../features/diet/pages/diet-page')) },
-      { path: 'dieta/lista-de-compras', ...comingSoon('Lista de compras') },
-      { path: 'dieta/refeicoes/:mealId', ...comingSoon('Refeição') },
       { path: 'perfil', ...comingSoon('Perfil') },
       { path: 'perfil/progresso', ...comingSoon('Progresso') },
       { path: '*', ...comingSoon('Página não encontrada') },
