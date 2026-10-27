@@ -1,0 +1,22 @@
+{
+  "name": "@workspace/mocks",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./browser": "./src/browser.ts",
+    "./node": "./src/node.ts",
+    "./handlers": "./src/handlers/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3"
+  },
+  "dependencies": {
+    "@workspace/core": "workspace:*",
+    "date-fns": "^4.4.0",
+    "msw": "^2.15.0"
+  }
+}
