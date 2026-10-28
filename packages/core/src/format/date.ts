@@ -9,10 +9,15 @@ export function greetingFor(date: Date): string {
   return 'Boa noite'
 }
 
+/** "Quarta-feira, 21 de outubro" */
+export function dayLabel(date: Date): string {
+  const label = format(date, "EEEE, d 'de' MMMM", { locale: ptBR })
+  return `${label.charAt(0).toUpperCase()}${label.slice(1)}`
+}
+
 /** "Quarta-feira, 21 de outubro · Semana 43" */
 export function homeDateLabel(date: Date): string {
-  const label = format(date, "EEEE, d 'de' MMMM", { locale: ptBR })
-  return `${label.charAt(0).toUpperCase()}${label.slice(1)} · Semana ${getISOWeek(date)}`
+  return `${dayLabel(date)} · Semana ${getISOWeek(date)}`
 }
 
 /** Letra do dia na faixa da semana: S T Q Q S S D */

@@ -37,6 +37,8 @@ type Db = {
   recovery: { login: string; attempts: number; token: string | null } | null
   /** Quem aceitou o convite (primeiro acesso): a API passa a responder como aluna nova */
   newStudent: { fullName: string; anamnesis: Anamnesis | null } | null
+  /** Painel do treinador: itens de atenção já resolvidos e aniversariantes já parabenizados */
+  coach: { resolvedAttention: string[]; congratulated: string[] }
   nextId: number
 }
 
@@ -78,6 +80,7 @@ const initial = (): Db => ({
   loginAttempts: 0,
   recovery: null,
   newStudent: null,
+  coach: { resolvedAttention: [], congratulated: [] },
   nextId: 1,
 })
 

@@ -2,15 +2,49 @@ import type { ComponentType, SVGProps } from "react"
 import { NavLink } from "react-router"
 import { cn } from "cn"
 
+type Icon = ComponentType<SVGProps<SVGSVGElement>>
+
 export type BottomNavItem = {
-  to: string
   label: string
-  icon: ComponentType<SVGProps<SVGSVGElement>>
-  /** Só marca ativo na rota exata (use no "/") */
-  end?: boolean
+  icon: Icon
+  /** Contador no canto do ícone (o painel mostra check-ins e conversas) */
+  badge?: number
+} & (
+  | {
+      to: string
+      /** Só marca ativo na rota exata (use no "/") */
+      end?: boolean
+    }
+  | {
+      /** Item que abre algo em vez de navegar (o "Mais" do painel) */
+      onSelect: () => void
+      active?: boolean
+    }
+)
+
+const itemClass = (active: boolean) =>
+  cn(
+    "relative flex flex-col items-center justify-center gap-0.75 rounded-full text-[11px] outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+    active
+      ? "bg-primary/15 font-extrabold text-primary"
+      : "font-bold text-muted-foreground hover:text-foreground"
+  )
+
+function Content({ label, icon: Icon, badge }: BottomNavItem) {
+  return (
+    <>
+      <Icon aria-hidden="true" className="size-5.5" strokeWidth={2} />
+      {label}
+      {!!badge && (
+        <span className="absolute top-1 right-3 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-extrabold text-primary-foreground">
+          {badge}
+        </span>
+      )}
+    </>
+  )
 }
 
-/** Barra inferior flutuante do app do aluno (4 itens) e do painel mobile. */
+/** Barra inferior flutuante do app do aluno (4 itens) e do painel mobile (5, com "Mais"). */
 export function BottomNav({
   items,
   label = "Navegação principal",
@@ -29,24 +63,29 @@ export function BottomNav({
       )}
       style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
     >
-      {items.map(({ to, label, icon: Icon, end }) => (
-        <NavLink
-          key={to}
-          to={to}
-          end={end}
-          className={({ isActive }) =>
-            cn(
-              "flex flex-col items-center justify-center gap-0.75 rounded-full text-[11px] outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-              isActive
-                ? "bg-primary/15 font-extrabold text-primary"
-                : "font-bold text-muted-foreground hover:text-foreground"
-            )
-          }
-        >
-          <Icon aria-hidden="true" className="size-5.5" strokeWidth={2} />
-          {label}
-        </NavLink>
-      ))}
+      {items.map((item) =>
+        "to" in item ? (
+          <NavLink
+            key={item.label}
+            to={item.to}
+            end={item.end}
+            aria-label={item.badge ? `${item.label}, ${item.badge} novos` : undefined}
+            className={({ isActive }) => itemClass(isActive)}
+          >
+            <Content {...item} />
+          </NavLink>
+        ) : (
+          <button
+            key={item.label}
+            type="button"
+            onClick={item.onSelect}
+            aria-expanded={item.active ?? false}
+            className={itemClass(item.active ?? false)}
+          >
+            <Content {...item} />
+          </button>
+        )
+      )}
     </nav>
   )
 }
