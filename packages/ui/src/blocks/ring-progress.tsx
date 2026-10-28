@@ -11,6 +11,8 @@ type RingProgressProps = {
   /** Conteúdo no centro do anel */
   children?: ReactNode
   className?: string
+  /** Cor do arco (padrão: a da marca). A lista de alunos pinta pela faixa de adesão. */
+  indicatorClassName?: string
 }
 
 /** Anel de progresso em SVG puro (sem biblioteca de gráfico, para a Home ficar leve). */
@@ -21,6 +23,7 @@ export function RingProgress({
   strokeWidth = 8,
   children,
   className,
+  indicatorClassName = "stroke-primary",
 }: RingProgressProps) {
   const r = (size - strokeWidth) / 2 - 1
   const c = size / 2
@@ -37,7 +40,7 @@ export function RingProgress({
             cy={c}
             r={r}
             fill="none"
-            className="stroke-primary motion-safe:transition-[stroke-dasharray] motion-safe:duration-500"
+            className={cn(indicatorClassName, "motion-safe:transition-[stroke-dasharray] motion-safe:duration-500")}
             strokeWidth={strokeWidth}
             strokeLinecap="round"
             strokeDasharray={`${filled} ${circumference}`}

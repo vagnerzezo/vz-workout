@@ -29,7 +29,7 @@ export function DesktopTopBar({ unread }: { unread: number }) {
       <SearchBox placeholder="Buscar aluno, ficha ou exercício" shortcut className="max-w-[520px] flex-[1_1_320px]" />
       <div className="grow" />
       <BellLink unread={unread} />
-      <Link to="/alunos/novo" className={buttonVariants({ size: 'lg' })}>
+      <Link to="/alunos/novo" className={cn(buttonVariants({ size: 'lg' }))}>
         <Plus aria-hidden="true" strokeWidth={2.6} />
         Novo aluno
       </Link>

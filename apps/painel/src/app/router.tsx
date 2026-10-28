@@ -17,7 +17,7 @@ export const routes: RouteObject[] = [
     element: <AppShell />, // sidebar (lg+) ou barra inferior com "Mais"
     children: [
       { index: true, ...page(() => import('../features/dashboard/pages/dashboard-page')) },
-      { path: 'alunos', ...comingSoon('Alunos') },
+      { path: 'alunos', ...page(() => import('../features/students/pages/students-page')) },
       { path: 'alunos/novo', ...comingSoon('Novo aluno') },
       { path: 'alunos/:id', ...comingSoon('Perfil do aluno') },
       { path: 'fichas', ...comingSoon('Fichas de treino') },

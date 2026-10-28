@@ -135,7 +135,7 @@ export function AttentionList({ items, now }: { items: AttentionItem[]; now: Dat
                 <p className="text-sm leading-[1.45] text-foreground-2 lg:flex-[2_1_260px]">{item.reason}</p>
                 <span className={cn('hidden h-6.5 items-center rounded-full px-2.5 text-xs font-extrabold lg:flex', tag.className)}>{tag.label}</span>
                 <div className="flex gap-2">
-                  <Link to={actionHref(item)} className={buttonVariants({ className: 'h-11 grow lg:h-9.5 lg:grow-0 lg:px-3.5 lg:text-[13px]' })}>
+                  <Link to={actionHref(item)} className={cn(buttonVariants({ className: 'h-11 grow lg:h-9.5 lg:grow-0 lg:px-3.5 lg:text-[13px]' }))}>
                     {actionLabel[item.action]}
                   </Link>
                   <Button

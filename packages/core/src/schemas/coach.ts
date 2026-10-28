@@ -88,3 +88,41 @@ export const CoachDashboard = z.object({
   ranking: z.array(z.object({ studentId: z.string(), name: z.string(), workouts: z.number().int().min(0) })),
 })
 export type CoachDashboard = z.infer<typeof CoachDashboard>
+
+export const StudentStatus = z.enum(['active', 'pending', 'overdue', 'archived'])
+export type StudentStatus = z.infer<typeof StudentStatus>
+
+/** Selo de alerta no card do celular: "Check-in novo", "Pagamento atrasado"… */
+export const StudentAlert = z.object({
+  label: z.string(),
+  tone: z.enum(['info', 'warning', 'danger']),
+})
+export type StudentAlert = z.infer<typeof StudentAlert>
+
+/** Linha da lista de alunos do painel. */
+export const StudentListItem = z.object({
+  id: z.string(),
+  fullName: z.string(),
+  email: z.email(),
+  tags: z.array(z.string()),
+  status: StudentStatus,
+  /** Treinos feitos ÷ previstos em 30 dias, de 0 a 100; null = ainda sem dados (pendente) */
+  adherence30d: z.number().min(0).max(100).nullable(),
+  lastWorkoutOn: z.iso.date().nullable(),
+  /** Ficha de treino válida até */
+  planEndsOn: z.iso.date().nullable(),
+  /** Plano (assinatura) pago até */
+  subscriptionEndsOn: z.iso.date().nullable(),
+  /** Só para pendentes: convite ainda sem cadastro */
+  invite: z.object({ sentAt: z.iso.datetime(), opened: z.boolean() }).nullable(),
+  alerts: z.array(StudentAlert),
+  conversationId: z.string().nullable(),
+})
+export type StudentListItem = z.infer<typeof StudentListItem>
+
+export const StudentList = z.object({
+  students: z.array(StudentListItem),
+  /** Tags que o treinador usa para filtrar (chips da lista) */
+  filterTags: z.array(z.string()),
+})
+export type StudentList = z.infer<typeof StudentList>
