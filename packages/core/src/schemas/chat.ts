@@ -8,7 +8,7 @@ export const MessageBody = z.discriminatedUnion('type', [
   z.object({ type: z.literal('video'), url: z.string().nullable() }),
   z.object({
     type: z.literal('event'),
-    event: z.enum(['workout', 'checkIn', 'plan']),
+    event: z.enum(['workout', 'checkIn', 'plan', 'diet']), // diet: o treinador compartilhou a dieta pelo chat
     title: z.string(), // "Você concluiu o Treino C — Legs"
     meta: z.string(), // "58 min · 9.870 kg · 2 recordes"
     link: z.string().startsWith('/'),

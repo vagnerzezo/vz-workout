@@ -1,5 +1,5 @@
 import { delay } from 'msw'
-import type { DietTemplate, NewStudent, PlanTemplateSummary, StudentAppSettings, StudentListItem, WorkoutPlan, Anamnesis, Charge, DietDay, LoggedSet, Message, NotificationSettings, ProgressPhoto, ShoppingListState, WaterLog, WeightEntry, WorkoutSession } from '@workspace/core'
+import type { CoachMessage, DietTemplate, NewStudent, PlanTemplateSummary, StudentAppSettings, StudentListItem, WorkoutPlan, Anamnesis, Charge, DietDay, LoggedSet, Message, NotificationSettings, ProgressPhoto, ShoppingListState, WaterLog, WeightEntry, WorkoutSession } from '@workspace/core'
 import { toIsoDate } from '@workspace/core'
 import { initialWater, mondayOf, type FinishedSession } from './fixtures/renato'
 import { renatoLogin } from './fixtures/renato-auth'
@@ -38,7 +38,7 @@ type Db = {
   /** Quem aceitou o convite (primeiro acesso): a API passa a responder como aluna nova */
   newStudent: { fullName: string; anamnesis: Anamnesis | null } | null
   /** Painel do treinador: itens de atenção já resolvidos e aniversariantes já parabenizados */
-  coach: { resolvedAttention: string[]; congratulated: string[]; archived: string[]; unarchived: string[]; resentInvites: string[]; addedTags: Record<string, string[]>; settings: Record<string, StudentAppSettings>; plans: Record<string, WorkoutPlan>; hiddenDays: Record<string, string[]>; created: CreatedStudent[]; templates: PlanTemplateSummary[] | null; templatePlans: Record<string, WorkoutPlan>; planAssignments: Record<string, PlanAssignment>; dietTemplates: DietTemplate[] | null; dietAssignments: Record<string, DietAssignment>; studentDiets: Record<string, Record<string, DietTemplate>>; checkInReplies: Record<string, { text: string; at: string }>; checkInReminders: Record<string, string> }
+  coach: { resolvedAttention: string[]; congratulated: string[]; archived: string[]; unarchived: string[]; resentInvites: string[]; addedTags: Record<string, string[]>; settings: Record<string, StudentAppSettings>; plans: Record<string, WorkoutPlan>; hiddenDays: Record<string, string[]>; created: CreatedStudent[]; templates: PlanTemplateSummary[] | null; templatePlans: Record<string, WorkoutPlan>; planAssignments: Record<string, PlanAssignment>; dietTemplates: DietTemplate[] | null; dietAssignments: Record<string, DietAssignment>; studentDiets: Record<string, Record<string, DietTemplate>>; checkInReplies: Record<string, { text: string; at: string }>; checkInReminders: Record<string, string>; chat: CoachChatState }
   nextId: number
 }
 
@@ -47,6 +47,9 @@ export type PlanAssignment = { templateId: string; startsOn: string; endsOn: str
 
 /** Dieta atribuída pela lista de dietas: substitui as que o aluno tinha. */
 export type DietAssignment = { templateIds: string[]; startsOn: string; endsOn: string; scaled: boolean }
+
+/** Chat do painel: o que o treinador mandou (fora a conversa do Renato, que fica em `sentMessages`) e as marcações. */
+export type CoachChatState = { sent: Record<string, CoachMessage[]>; read: Record<string, string>; notes: Record<string, string>; muted: Record<string, boolean>; onlyCoach: boolean; autoReply: boolean }
 
 /** Aluno cadastrado pelo painel nesta sessão: fica pendente até usar o convite. */
 export type CreatedStudent = { student: StudentListItem; form: NewStudent; planLabel: string; code: string }
@@ -89,7 +92,7 @@ const initial = (): Db => ({
   loginAttempts: 0,
   recovery: null,
   newStudent: null,
-  coach: { resolvedAttention: [], congratulated: [], archived: [], unarchived: [], resentInvites: [], addedTags: {}, settings: {}, plans: {}, hiddenDays: {}, created: [], templates: null, templatePlans: {}, planAssignments: {}, dietTemplates: null, dietAssignments: {}, studentDiets: {}, checkInReplies: {}, checkInReminders: {} },
+  coach: { resolvedAttention: [], congratulated: [], archived: [], unarchived: [], resentInvites: [], addedTags: {}, settings: {}, plans: {}, hiddenDays: {}, created: [], templates: null, templatePlans: {}, planAssignments: {}, dietTemplates: null, dietAssignments: {}, studentDiets: {}, checkInReplies: {}, checkInReminders: {}, chat: { sent: {}, read: {}, notes: {}, muted: {}, onlyCoach: false, autoReply: true } },
   nextId: 1,
 })
 

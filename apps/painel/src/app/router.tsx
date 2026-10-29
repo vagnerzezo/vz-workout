@@ -28,7 +28,7 @@ export const routes: RouteObject[] = [
       { path: 'dietas/:id', ...page(() => import('../features/diet-editor/pages/diet-editor-page')) },
       { path: 'check-ins', ...page(() => import('../features/check-ins/pages/check-ins-page')) },
       { path: 'check-ins/revisar/:id', ...page(() => import('../features/check-ins/pages/review-page')) },
-      { path: 'chat/:conversationId?', ...comingSoon('Chat') },
+      { path: 'chat/:conversationId?', ...page(() => import('../features/chat/pages/chat-page')) },
       { path: 'notificacoes', ...comingSoon('Notificações') },
       { path: 'notificacoes/nova', ...comingSoon('Nova notificação') },
       { path: 'financeiro', ...comingSoon('Financeiro') },
