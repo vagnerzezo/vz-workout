@@ -33,6 +33,17 @@ export const exerciseLibrary: Exercise[] = [
   ex('ex_hip_thrust', 'Elevação pélvica', 'glutes', ['hamstrings'], 'Barra'),
   ex('ex_bulgarian_split', 'Afundo búlgaro', 'quads', ['glutes'], 'Halteres'),
   ex('ex_standing_calf', 'Panturrilha em pé', 'calves', [], 'Máquina'),
+  // Usados só nos modelos do painel (a ficha do Renato não tem)
+  ex('ex_pull_up', 'Barra fixa', 'lats', ['biceps'], 'Peso corporal'),
+  ex('ex_face_pull', 'Face pull', 'upperBack', ['sideDelts'], 'Polia'),
+  ex('ex_hammer_curl', 'Rosca martelo', 'biceps', [], 'Halteres'),
+  ex('ex_back_squat', 'Agachamento livre', 'quads', ['glutes'], 'Barra'),
+  ex('ex_deadlift', 'Levantamento terra', 'hamstrings', ['glutes', 'upperBack'], 'Barra'),
+  ex('ex_push_up', 'Flexão de braço', 'chest', ['triceps', 'shoulders'], 'Peso corporal'),
+  ex('ex_bodyweight_squat', 'Agachamento com peso corporal', 'quads', ['glutes'], 'Peso corporal'),
+  ex('ex_band_row', 'Remada com elástico', 'upperBack', ['lats', 'biceps'], 'Elástico'),
+  ex('ex_plank', 'Prancha', 'core', [], 'Peso corporal'),
+  ex('ex_kettlebell_swing', 'Swing com kettlebell', 'glutes', ['hamstrings'], 'Kettlebell'),
 ]
 
 type Rx = [exerciseId: string, warmup: number, prep: number, working: number, reps: string, rest: number, technique?: string]

@@ -38,7 +38,7 @@ type Db = {
   /** Quem aceitou o convite (primeiro acesso): a API passa a responder como aluna nova */
   newStudent: { fullName: string; anamnesis: Anamnesis | null } | null
   /** Painel do treinador: itens de atenção já resolvidos e aniversariantes já parabenizados */
-  coach: { resolvedAttention: string[]; congratulated: string[]; archived: string[]; unarchived: string[]; resentInvites: string[]; addedTags: Record<string, string[]>; settings: Record<string, StudentAppSettings>; answeredCheckIns: string[]; plans: Record<string, WorkoutPlan>; hiddenDays: Record<string, string[]>; created: CreatedStudent[]; templates: PlanTemplateSummary[] | null; planAssignments: Record<string, PlanAssignment> }
+  coach: { resolvedAttention: string[]; congratulated: string[]; archived: string[]; unarchived: string[]; resentInvites: string[]; addedTags: Record<string, string[]>; settings: Record<string, StudentAppSettings>; answeredCheckIns: string[]; plans: Record<string, WorkoutPlan>; hiddenDays: Record<string, string[]>; created: CreatedStudent[]; templates: PlanTemplateSummary[] | null; templatePlans: Record<string, WorkoutPlan>; planAssignments: Record<string, PlanAssignment> }
   nextId: number
 }
 
@@ -86,7 +86,7 @@ const initial = (): Db => ({
   loginAttempts: 0,
   recovery: null,
   newStudent: null,
-  coach: { resolvedAttention: [], congratulated: [], archived: [], unarchived: [], resentInvites: [], addedTags: {}, settings: {}, answeredCheckIns: [], plans: {}, hiddenDays: {}, created: [], templates: null, planAssignments: {} },
+  coach: { resolvedAttention: [], congratulated: [], archived: [], unarchived: [], resentInvites: [], addedTags: {}, settings: {}, answeredCheckIns: [], plans: {}, hiddenDays: {}, created: [], templates: null, templatePlans: {}, planAssignments: {} },
   nextId: 1,
 })
 

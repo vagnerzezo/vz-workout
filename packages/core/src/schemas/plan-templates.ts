@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { Experience } from './auth'
+import { WorkoutPlan } from './workout'
 
 export const PlanGoal = z.enum(['hypertrophy', 'fatLoss', 'strength', 'conditioning'])
 export type PlanGoal = z.infer<typeof PlanGoal>
@@ -44,3 +45,7 @@ export const AssignPlan = z.object({
   startsOn: z.iso.date(),
 })
 export type AssignPlan = z.infer<typeof AssignPlan>
+
+/** GET /coach/plans/:id e resposta do PUT: o modelo inteiro, para o editor. */
+export const PlanTemplate = z.object({ summary: PlanTemplateSummary, plan: WorkoutPlan })
+export type PlanTemplate = z.infer<typeof PlanTemplate>

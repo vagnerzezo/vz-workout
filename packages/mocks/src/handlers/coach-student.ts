@@ -11,7 +11,7 @@ import type {
   StudentListItem,
   WeightEntry,
 } from '@workspace/core'
-import { formatDecimal, formatPhone, parseIsoDate, shortDate, StudentAppSettings as SettingsSchema, toIsoDate } from '@workspace/core'
+import { formatDecimal, formatPhone, parseIsoDate, shortDate, StudentAppSettings as SettingsSchema, toIsoDate, WorkoutPlan as WorkoutPlanSchema } from '@workspace/core'
 import { currentScenario, db, latency } from '../db'
 import { renatoMe } from '../fixtures/renato'
 import { renatoDiet } from '../fixtures/renato-diet'
@@ -301,6 +301,18 @@ export const coachStudentHandlers = [
   }),
 
   // Visível para o aluno ou rascunho (o app do aluno só mostra os visíveis)
+  // Editor de ficha aberto pelo perfil: salva a cópia do aluno inteira (o app dele passa a ver na hora)
+  http.put('/api/coach/students/:id/workout-plan', async ({ params, request }) => {
+    const s = find(params.id as string)
+    if (!s) return notFound()
+    const body = (await request.json().catch(() => null)) as { plan?: unknown } | null
+    const parsed = WorkoutPlanSchema.safeParse(body?.plan)
+    if (!parsed.success) return HttpResponse.json({ message: 'Ficha inválida' }, { status: 422 })
+    await latency()
+    db.coach.plans[s.id] = { ...parsed.data, updatedAt: toIsoDate(new Date()) }
+    return new HttpResponse(null, { status: 204 })
+  }),
+
   http.put('/api/coach/students/:id/workout-plan/days/:dayId/visibility', async ({ params, request }) => {
     const s = find(params.id as string)
     if (!s) return notFound()
