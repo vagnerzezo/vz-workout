@@ -52,7 +52,7 @@ export function InfoTab({ detail: d, now }: { detail: StudentDetail; now: Date }
     ...(d.sex ? [{ label: 'Sexo', value: d.sex === 'male' ? 'Masculino' : 'Feminino' }] : []),
     ...(d.heightCm ? [{ label: 'Altura', value: `${d.heightCm} cm` }] : []),
     ...(d.phone ? [{ label: 'Telefone', value: d.phone }] : []),
-    { label: 'E-mail', value: d.student.email },
+    ...(d.student.email ? [{ label: 'E-mail', value: d.student.email }] : []),
     ...(d.city ? [{ label: 'Cidade', value: d.city }] : []),
     { label: 'Aluno desde', value: date(d.memberSince) },
   ]

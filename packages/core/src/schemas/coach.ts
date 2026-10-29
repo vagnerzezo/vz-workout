@@ -103,7 +103,7 @@ export type StudentAlert = z.infer<typeof StudentAlert>
 export const StudentListItem = z.object({
   id: z.string(),
   fullName: z.string(),
-  email: z.email(),
+  email: z.email().nullable(), // o e-mail é opcional no cadastro
   tags: z.array(z.string()),
   status: StudentStatus,
   /** Treinos feitos ÷ previstos em 30 dias, de 0 a 100; null = ainda sem dados (pendente) */

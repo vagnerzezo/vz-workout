@@ -11,7 +11,7 @@ import type {
   StudentListItem,
   WeightEntry,
 } from '@workspace/core'
-import { formatDecimal, parseIsoDate, shortDate, StudentAppSettings as SettingsSchema, toIsoDate } from '@workspace/core'
+import { formatDecimal, formatPhone, parseIsoDate, shortDate, StudentAppSettings as SettingsSchema, toIsoDate } from '@workspace/core'
 import { currentScenario, db, latency } from '../db'
 import { renatoMe } from '../fixtures/renato'
 import { renatoDiet } from '../fixtures/renato-diet'
@@ -91,9 +91,22 @@ function weightsOf(s: StudentListItem, now: Date) {
   return s.id === renatoMe.id ? db.weights : generatedWeights(s, now)
 }
 
+const createdOf = (s: Pick<StudentListItem, 'id'>) => db.coach.created.find((c) => c.student.id === s.id)
+
+/** WhatsApp do aluno. O do Pedro é o do canvas (o "número já cadastrado" do Novo aluno). */
+export function phoneOf(s: Pick<StudentListItem, 'id'>): string {
+  const created = createdOf(s)
+  if (created) return formatPhone(created.form.phone)
+  if (s.id === renatoMe.id) return '(51) 99876-5432'
+  if (s.id === 'stu_pedro') return '(51) 98877-1234'
+  const seed = seedOf(s.id)
+  return `(51) 9${String(8000 + seed).padStart(4, '0')}-${String(1000 + ((seed * 7) % 9000)).padStart(4, '0')}`
+}
+
 /** Perfil no painel. O Renato segue o canvas; os outros têm dados genéricos coerentes com a lista. */
 function detailOf(s: StudentListItem, now: Date): StudentDetail {
   const renato = s.id === renatoMe.id
+  const created = createdOf(s)
   const seed = seedOf(s.id)
   const female = /a$/.test(s.fullName.split(' ')[0]!)
   const lateDays = s.lastWorkoutOn ? Math.round((day(now, 0).getTime() - parseIsoDate(s.lastWorkoutOn).getTime()) / 86_400_000) : 0
@@ -106,7 +119,7 @@ function detailOf(s: StudentListItem, now: Date): StudentDetail {
 
   return {
     student: s,
-    phone: renato ? '(51) 99876-5432' : `(51) 9${String(8000 + seed).padStart(4, '0')}-${String(1000 + ((seed * 7) % 9000)).padStart(4, '0')}`,
+    phone: phoneOf(s),
     birthDate: renato ? '1993-05-12' : `${1985 + (seed % 18)}-0${1 + (seed % 9)}-1${seed % 10}`,
     sex: renato ? 'male' : female ? 'female' : 'male',
     heightCm: renato ? 182 : (female ? 158 : 170) + (seed % 18),
@@ -138,12 +151,14 @@ function detailOf(s: StudentListItem, now: Date): StudentDetail {
                   { label: 'Lesões ou dores', value: 'Nenhuma', highlight: false },
                 ],
           },
-    subscription: {
-      planLabel: `Consultoria ${s.tags.includes('Presencial') ? 'presencial' : 'online'} · ${['trimestral', 'mensal', 'semestral'][seed % 3]}`,
-      startedOn: renato ? '2026-09-15' : iso(now, -(30 + (seed % 60))),
-      endsOn: s.subscriptionEndsOn ?? iso(now, 30),
-      payment: s.alerts.some((a) => a.label === 'Pagamento atrasado') ? 'late' : s.status === 'pending' ? 'pending' : 'ok',
-    },
+    subscription: created
+      ? { planLabel: created.planLabel, startedOn: created.form.startsOn, endsOn: s.subscriptionEndsOn!, payment: created.form.paid ? 'ok' : 'pending' }
+      : {
+          planLabel: `Consultoria ${s.tags.includes('Presencial') ? 'presencial' : 'online'} · ${['trimestral', 'mensal', 'semestral'][seed % 3]}`,
+          startedOn: renato ? '2026-09-15' : iso(now, -(30 + (seed % 60))),
+          endsOn: s.subscriptionEndsOn ?? iso(now, 30),
+          payment: s.alerts.some((a) => a.label === 'Pagamento atrasado') ? 'late' : s.status === 'pending' ? 'pending' : 'ok',
+        },
     lastSeenAt: s.status === 'active' && s.lastWorkoutOn ? new Date(parseIsoDate(s.lastWorkoutOn).getTime() + 19.2 * 3_600_000).toISOString() : null,
     settings: settingsOf(s.id),
   }

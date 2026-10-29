@@ -2,6 +2,9 @@ import type { ActivityEvent, AttentionItem, Coach, CoachCounters, CoachDashboard
 import { toIsoDate } from '@workspace/core'
 import { mondayOf, coachName, coachFirstName, renatoMe } from './renato'
 
+/** Onde o aluno faz o primeiro acesso (o link do convite aponta para o app publicado). */
+export const studentAppUrl = 'https://vzworkout.vercel.app'
+
 /** O treinador do painel: o mesmo personal que os alunos veem no app. */
 export const kaueCoach: Coach = {
   id: 'coach_kaue',

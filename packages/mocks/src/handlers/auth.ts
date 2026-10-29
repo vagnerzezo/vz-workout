@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import type { Invite, PublicBranding } from '@workspace/core'
-import { Anamnesis, maskLoginId, normalizeInviteCode, parseLoginId, passwordRules } from '@workspace/core'
+import { Anamnesis, formatPhone, maskLoginId, normalizeInviteCode, parseLoginId, passwordRules } from '@workspace/core'
 import { db, latency, newId, setLoggedIn } from '../db'
 import { fernandaInvite, MAX_ATTEMPTS, RECOVERY_CODE, renatoLogin } from '../fixtures/renato-auth'
 import { coachName, renatoMe } from '../fixtures/renato'
@@ -8,6 +8,15 @@ import { coachName, renatoMe } from '../fixtures/renato'
 const isRenato = (login: string) => {
   const id = parseLoginId(login)
   return !!id && (id.value === renatoLogin.phone || id.value === renatoLogin.email)
+}
+
+/** Convite pelo código: o da Fernanda (canvas) ou um criado no painel nesta sessão. Já usado → null. */
+function inviteFor(code: string): Invite | null {
+  if (db.newStudent) return null // no mock só cabe um primeiro acesso por sessão
+  const raw = normalizeInviteCode(code)
+  if (raw === fernandaInvite.code) return fernandaInvite
+  const created = db.coach.created.find((c) => c.code === raw)
+  return created ? { code: raw, fullName: created.form.fullName, phone: formatPhone(created.form.phone), email: created.form.email, coachName } : null
 }
 
 const tooMany = () => HttpResponse.json({ message: 'Muitas tentativas. Espere 15 minutos ou recupere a senha.' }, { status: 429 })
@@ -85,24 +94,25 @@ export const authHandlers = [
   // Convite do treinador: código errado ou já usado → 404
   http.get('/api/auth/invites/:code', async ({ params }) => {
     await latency()
-    if (normalizeInviteCode(String(params.code)) !== fernandaInvite.code || db.newStudent) {
-      return HttpResponse.json({ message: 'Código não encontrado ou expirado' }, { status: 404 })
-    }
-    return HttpResponse.json<Invite>(fernandaInvite)
+    const invite = inviteFor(String(params.code))
+    if (!invite) return HttpResponse.json({ message: 'Código não encontrado ou expirado' }, { status: 404 })
+    // O painel passa a mostrar "Convite aberto, sem cadastro"
+    const created = db.coach.created.find((c) => c.code === invite.code)
+    if (created?.student.invite) created.student.invite.opened = true
+    return HttpResponse.json<Invite>(invite)
   }),
 
   // Cria a senha, registra os aceites e já entra
   http.post('/api/auth/invites/:code/accept', async ({ params, request }) => {
     const { password, terms, health } = (await request.json()) as { password: string; terms: boolean; health: boolean }
-    if (normalizeInviteCode(String(params.code)) !== fernandaInvite.code || db.newStudent) {
-      return HttpResponse.json({ message: 'Código não encontrado ou expirado' }, { status: 404 })
-    }
+    const invite = inviteFor(String(params.code))
+    if (!invite) return HttpResponse.json({ message: 'Código não encontrado ou expirado' }, { status: 404 })
     if (!terms || !health) return HttpResponse.json({ message: 'Aceite os termos para continuar' }, { status: 422 })
-    if (!passwordRules(password, { name: fernandaInvite.fullName, phone: fernandaInvite.phone }).every((r) => r.ok)) {
+    if (!passwordRules(password, { name: invite.fullName, phone: invite.phone }).every((r) => r.ok)) {
       return HttpResponse.json({ message: 'Senha fraca' }, { status: 422 })
     }
     await latency()
-    db.newStudent = { fullName: fernandaInvite.fullName, anamnesis: null }
+    db.newStudent = { fullName: invite.fullName, anamnesis: null }
     db.password = password
     setLoggedIn(true)
     return new HttpResponse(null, { status: 201 })

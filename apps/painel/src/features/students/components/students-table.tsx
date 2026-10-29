@@ -60,7 +60,7 @@ export function StudentsTable({ students, now, page, selection, onSelectionChang
           </span>
           <span className="flex min-w-0 flex-col">
             <strong className="text-sm font-extrabold">{s.fullName}</strong>
-            <span className="truncate text-xs text-muted-foreground">{s.email}</span>
+            <span className="truncate text-xs text-muted-foreground">{s.email ?? 'Sem e-mail'}</span>
           </span>
         </Link>
       ),

@@ -81,7 +81,7 @@ export function filterStudents<T extends Pick<StudentListItem, 'status' | 'fullN
   return list.filter(
     (s) =>
       s.status === f.status &&
-      (!q || normalize(s.fullName).includes(q) || normalize(s.email).includes(q)) &&
+      (!q || normalize(s.fullName).includes(q) || normalize(s.email ?? '').includes(q)) &&
       (f.tags.length === 0 || f.tags.some((t) => s.tags.includes(t))),
   )
 }
@@ -100,7 +100,7 @@ export function studentsToCsv(list: StudentListItem[]): string {
   const status: Record<StudentStatus, string> = { active: 'Ativo', pending: 'Pendente', overdue: 'Vencido', archived: 'Arquivado' }
   const rows = list.map((s) => [
     s.fullName,
-    s.email,
+    s.email ?? '',
     s.tags.join(', '),
     s.adherence30d === null ? '' : String(Math.round(s.adherence30d)),
     csvDate(s.lastWorkoutOn),

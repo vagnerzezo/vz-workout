@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { StudentList } from '@workspace/core'
 import { api } from '../../../shared/api/client'
 import { coachKeys } from '../../../shared/api/coach'
@@ -27,17 +27,16 @@ async function post(path: string, body?: unknown) {
 }
 
 /** Depois de mexer na carteira: a lista, os contadores do menu e o dashboard recarregam. */
+export const refreshPortfolio = (qc: QueryClient) =>
+  Promise.all([
+    qc.invalidateQueries({ queryKey: studentKeys.all }),
+    qc.invalidateQueries({ queryKey: coachKeys.me }),
+    qc.invalidateQueries({ queryKey: dashboardKeys.all }),
+  ])
+
 function useRefreshAfter<V>(fn: (vars: V) => Promise<void>) {
   const qc = useQueryClient()
-  return useMutation({
-    mutationFn: fn,
-    onSuccess: () =>
-      Promise.all([
-        qc.invalidateQueries({ queryKey: studentKeys.all }),
-        qc.invalidateQueries({ queryKey: coachKeys.me }),
-        qc.invalidateQueries({ queryKey: dashboardKeys.all }),
-      ]),
-  })
+  return useMutation({ mutationFn: fn, onSuccess: () => refreshPortfolio(qc) })
 }
 
 export const useArchiveStudents = () => useRefreshAfter((ids: string[]) => post('/coach/students/archive', { ids }))

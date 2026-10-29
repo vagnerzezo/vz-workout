@@ -1,5 +1,5 @@
 import { delay } from 'msw'
-import type { StudentAppSettings, WorkoutPlan, Anamnesis, Charge, DietDay, LoggedSet, Message, NotificationSettings, ProgressPhoto, ShoppingListState, WaterLog, WeightEntry, WorkoutSession } from '@workspace/core'
+import type { NewStudent, StudentAppSettings, StudentListItem, WorkoutPlan, Anamnesis, Charge, DietDay, LoggedSet, Message, NotificationSettings, ProgressPhoto, ShoppingListState, WaterLog, WeightEntry, WorkoutSession } from '@workspace/core'
 import { toIsoDate } from '@workspace/core'
 import { initialWater, mondayOf, type FinishedSession } from './fixtures/renato'
 import { renatoLogin } from './fixtures/renato-auth'
@@ -38,9 +38,12 @@ type Db = {
   /** Quem aceitou o convite (primeiro acesso): a API passa a responder como aluna nova */
   newStudent: { fullName: string; anamnesis: Anamnesis | null } | null
   /** Painel do treinador: itens de atenção já resolvidos e aniversariantes já parabenizados */
-  coach: { resolvedAttention: string[]; congratulated: string[]; archived: string[]; unarchived: string[]; resentInvites: string[]; addedTags: Record<string, string[]>; settings: Record<string, StudentAppSettings>; answeredCheckIns: string[]; plans: Record<string, WorkoutPlan>; hiddenDays: Record<string, string[]> }
+  coach: { resolvedAttention: string[]; congratulated: string[]; archived: string[]; unarchived: string[]; resentInvites: string[]; addedTags: Record<string, string[]>; settings: Record<string, StudentAppSettings>; answeredCheckIns: string[]; plans: Record<string, WorkoutPlan>; hiddenDays: Record<string, string[]>; created: CreatedStudent[] }
   nextId: number
 }
+
+/** Aluno cadastrado pelo painel nesta sessão: fica pendente até usar o convite. */
+export type CreatedStudent = { student: StudentListItem; form: NewStudent; planLabel: string; code: string }
 
 const SESSION_KEY = 'mock-sessao'
 
@@ -80,7 +83,7 @@ const initial = (): Db => ({
   loginAttempts: 0,
   recovery: null,
   newStudent: null,
-  coach: { resolvedAttention: [], congratulated: [], archived: [], unarchived: [], resentInvites: [], addedTags: {}, settings: {}, answeredCheckIns: [], plans: {}, hiddenDays: {} },
+  coach: { resolvedAttention: [], congratulated: [], archived: [], unarchived: [], resentInvites: [], addedTags: {}, settings: {}, answeredCheckIns: [], plans: {}, hiddenDays: {}, created: [] },
   nextId: 1,
 })
 

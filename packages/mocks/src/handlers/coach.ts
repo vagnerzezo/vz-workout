@@ -8,7 +8,7 @@ import { allSessions } from './workout'
 
 /** Carteira do treinador com o que já foi arquivado ou reativado nesta sessão. */
 export function students(now: Date): StudentListItem[] {
-  return coachStudents(now).map((student) => {
+  return [...coachStudents(now), ...db.coach.created.map((c) => c.student)].map((student) => {
     const added = db.coach.addedTags[student.id] ?? []
     const s = { ...student, tags: [...new Set([...student.tags, ...added])] }
     // O Renato é o aluno do app: o último treino vem das sessões dele (inclui as que ele salvar agora)

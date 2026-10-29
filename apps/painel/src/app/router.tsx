@@ -18,7 +18,7 @@ export const routes: RouteObject[] = [
     children: [
       { index: true, ...page(() => import('../features/dashboard/pages/dashboard-page')) },
       { path: 'alunos', ...page(() => import('../features/students/pages/students-page')) },
-      { path: 'alunos/novo', ...comingSoon('Novo aluno') },
+      { path: 'alunos/novo', ...page(() => import('../features/new-student/pages/new-student-page')) },
       { path: 'alunos/:id', ...page(() => import('../features/student-profile/pages/student-page')) },
       { path: 'fichas', ...comingSoon('Fichas de treino') },
       { path: 'fichas/:id', ...comingSoon('Editor de ficha') },
