@@ -13,6 +13,8 @@ export function students(now: Date): StudentListItem[] {
     const s = { ...student, tags: [...new Set([...student.tags, ...added])] }
     // O Renato é o aluno do app: o último treino vem das sessões dele (inclui as que ele salvar agora)
     if (s.id === renatoMe.id) s.lastWorkoutOn = allSessions(now, false)[0]?.date ?? s.lastWorkoutOn
+    const assigned = db.coach.planAssignments[s.id]
+    if (assigned) s.planEndsOn = assigned.endsOn
     if (db.coach.archived.includes(s.id)) return { ...s, status: 'archived' }
     if (db.coach.unarchived.includes(s.id)) return { ...s, status: 'active' }
     return s

@@ -20,7 +20,7 @@ export const routes: RouteObject[] = [
       { path: 'alunos', ...page(() => import('../features/students/pages/students-page')) },
       { path: 'alunos/novo', ...page(() => import('../features/new-student/pages/new-student-page')) },
       { path: 'alunos/:id', ...page(() => import('../features/student-profile/pages/student-page')) },
-      { path: 'fichas', ...comingSoon('Fichas de treino') },
+      { path: 'fichas', ...page(() => import('../features/plans/pages/plans-page')) },
       { path: 'fichas/:id', ...comingSoon('Editor de ficha') },
       { path: 'dietas', ...comingSoon('Fichas de dieta') },
       { path: 'dietas/:id', ...comingSoon('Editor de dieta') },
