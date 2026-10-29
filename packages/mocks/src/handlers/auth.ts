@@ -3,7 +3,8 @@ import type { Invite, PublicBranding } from '@workspace/core'
 import { Anamnesis, formatPhone, maskLoginId, normalizeInviteCode, parseLoginId, passwordRules } from '@workspace/core'
 import { db, latency, newId, setLoggedIn } from '../db'
 import { fernandaInvite, MAX_ATTEMPTS, RECOVERY_CODE, renatoLogin } from '../fixtures/renato-auth'
-import { coachName, renatoMe } from '../fixtures/renato'
+import { coachName } from '../fixtures/renato'
+import { publishedBranding } from './coach-settings'
 
 const isRenato = (login: string) => {
   const id = parseLoginId(login)
@@ -29,7 +30,7 @@ export const authHandlers = [
 
   http.get('/api/public/branding', async () => {
     await latency()
-    return HttpResponse.json<PublicBranding>({ appName: renatoMe.branding.appName, coachName, brandColor: renatoMe.branding.brandColor })
+    return HttpResponse.json<PublicBranding>({ ...publishedBranding(), coachName })
   }),
 
   http.post('/api/auth/login', async ({ request }) => {

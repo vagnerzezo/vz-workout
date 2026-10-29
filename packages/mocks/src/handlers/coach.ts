@@ -9,6 +9,7 @@ import { unreadChats } from './coach-chat'
 import { unreadCoachNotifications } from './coach-notifications'
 import { pendingProofs } from './coach-finance'
 import { coachCheckIns } from './coach-checkins'
+import { publishedBranding } from './coach-settings'
 import { allSessions } from './workout'
 
 /** Carteira do treinador com o que já foi arquivado ou reativado nesta sessão. */
@@ -39,7 +40,7 @@ const failed = () => HttpResponse.json({ message: 'Erro simulado' }, { status: 5
 export const coachHandlers = [
   http.get('/api/coach/me', async () => {
     await latency()
-    return HttpResponse.json<Coach>({ ...kaueCoach, activeStudents: activeCount() })
+    return HttpResponse.json<Coach>({ ...kaueCoach, branding: publishedBranding(), activeStudents: activeCount() })
   }),
 
   http.get('/api/coach/counters', async () => {

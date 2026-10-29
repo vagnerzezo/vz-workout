@@ -7,6 +7,7 @@ import { appPlan } from '../live-plan'
 import { hasUnreadMessages } from './chat'
 import { homeNutrition } from './diet'
 import { inbox } from './notifications'
+import { publishedBranding } from './coach-settings'
 
 function homeFor(today: Date): HomeSummary {
   const lastWeightKg = db.weights.at(-1)?.kg ?? null
@@ -40,7 +41,7 @@ export const homeHandlers = [
     const paused = currentScenario() === 'pausado' && db.charge?.status !== 'paid'
     const name = db.newStudent?.fullName
     const who = name ? { id: 'stu_novo', fullName: name, firstName: name.split(' ')[0]! } : {}
-    return HttpResponse.json<Me>({ ...renatoMe, ...who, access: paused ? 'paused' : 'active' })
+    return HttpResponse.json<Me>({ ...renatoMe, ...who, branding: publishedBranding(), access: paused ? 'paused' : 'active' })
   }),
 
   http.get('/api/me/home', async () => {
