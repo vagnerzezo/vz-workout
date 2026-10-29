@@ -6,10 +6,10 @@ import { db, latency, newId } from '../db'
 import { coachStudents } from '../fixtures/coach-students'
 import { initialUsage, planTemplates } from '../fixtures/plan-templates'
 import { renatoMe } from '../fixtures/renato'
-import { exerciseLibrary } from '../fixtures/renato-plan'
 import { templatePlan } from '../fixtures/template-plans'
 import { coachPlan } from '../live-plan'
 import { students } from './coach'
+import { libraryExercises } from './coach-library'
 
 const templates = () => (db.coach.templates ??= planTemplates(new Date()))
 
@@ -42,6 +42,21 @@ function coachPlans(): CoachPlans {
 
 const notFound = () => HttpResponse.json({ message: 'Ficha não encontrada' }, { status: 404 })
 
+/** Fichas que usam o exercício: cada modelo e as cópias dos alunos que o usam (o "Usado em 18 fichas"). */
+export function exerciseUsage(exerciseId: string) {
+  const { templates: list } = coachPlans()
+  const items = list
+    .filter((t) => !t.archived)
+    .flatMap((t) => {
+      const days = planOf(templates().find((x) => x.id === t.id)!).days.filter((d) => d.exercises.some((e) => e.exerciseId === exerciseId))
+      if (days.length === 0) return []
+      const day = days[0]!
+      return [{ name: t.name, meta: `Modelo · Treino ${day.letter} — ${day.name} · ${t.studentsUsing === 1 ? '1 aluno' : `${t.studentsUsing} alunos`}`, link: `/fichas/${t.id}?treino=${day.id}`, students: t.studentsUsing }]
+    })
+  const students = items.reduce((n, i) => n + i.students, 0)
+  return { items: items.map(({ students: _s, ...rest }) => rest), templates: items.length, students, count: items.length + students }
+}
+
 const withUsage = (t: PlanTemplateSummary) => coachPlans().templates.find((x) => x.id === t.id) ?? t
 
 export const coachPlanHandlers = [
@@ -53,7 +68,7 @@ export const coachPlanHandlers = [
   // Biblioteca de exercícios (a do editor de ficha)
   http.get('/api/coach/exercises', async () => {
     await latency()
-    return HttpResponse.json<Exercise[]>(exerciseLibrary)
+    return HttpResponse.json<Exercise[]>(libraryExercises())
   }),
 
   // "Nova ficha": um modelo vazio com o Treino A, que o editor abre em seguida

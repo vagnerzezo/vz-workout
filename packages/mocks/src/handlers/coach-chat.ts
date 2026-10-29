@@ -76,7 +76,7 @@ function audienceOf(a: BroadcastAudience, list: StudentListItem[], now: Date): S
 }
 
 /** Mensagem do treinador: na conversa do Renato vai para o app dele; nas outras, fica no painel. */
-function sendFromCoach(id: string, body: MessageBody, now: Date): CoachMessage {
+export function sendFromCoach(id: string, body: MessageBody, now: Date): CoachMessage {
   if (id === RENATO) {
     const m: Message = { id: newId('msg'), from: 'coach', sentAt: now.toISOString(), status: null, body }
     db.sentMessages = [...db.sentMessages, m]
@@ -86,6 +86,9 @@ function sendFromCoach(id: string, body: MessageBody, now: Date): CoachMessage {
   db.coach.chat.sent[id] = [...(db.coach.chat.sent[id] ?? []), m]
   return m
 }
+
+/** Conversa individual do aluno (a do Renato é a do app). */
+export const conversationOf = (s: StudentListItem) => (s.id === renatoMe.id ? RENATO : s.conversationId)
 
 const notFound = () => HttpResponse.json({ message: 'Conversa não encontrada' }, { status: 404 })
 
@@ -186,7 +189,7 @@ export const coachChatHandlers = [
     await latency()
     const now = new Date()
     const targets = audienceOf(audience.data, students(now), now)
-    for (const s of targets) sendFromCoach(s.id === renatoMe.id ? RENATO : s.conversationId!, { type: 'text', text: personalize(text, s.fullName) }, now)
+    for (const s of targets) sendFromCoach(conversationOf(s)!, { type: 'text', text: personalize(text, s.fullName) }, now)
     return HttpResponse.json({ sent: targets.length })
   }),
 ]

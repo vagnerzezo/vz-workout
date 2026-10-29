@@ -9,6 +9,9 @@ import { students } from './coach'
 import { weightOf } from './coach-student'
 
 const templates = () => (db.coach.dietTemplates ??= dietTemplates(new Date()))
+
+/** Todos os modelos de dieta (a biblioteca conta em quantos cada alimento aparece). */
+export const allDietTemplates = () => templates()
 const DIET_WEEKS = 8 // vigência da dieta atribuída
 
 /** Dietas de cada aluno ativo do fixture, na ordem da carteira (o Renato, primeiro, fica com a recomposição). */

@@ -8,6 +8,7 @@ import { coachNotificationHandlers } from './coach-notifications'
 import { coachCheckInHandlers } from './coach-checkins'
 import { coachDietHandlers } from './coach-diets'
 import { coachFinanceHandlers } from './coach-finance'
+import { coachLibraryHandlers } from './coach-library'
 import { coachNewStudentHandlers } from './coach-new-student'
 import { coachPlanHandlers } from './coach-plans'
 import { coachStudentHandlers } from './coach-student'
@@ -20,6 +21,6 @@ import { shoppingHandlers } from './shopping'
 import { workoutHandlers } from './workout'
 
 // authHandlers primeiro: o 401 sem sessão vale para todas as rotas /api/me
-export const handlers = [...authHandlers, ...homeHandlers, ...waterHandlers, ...dietHandlers, ...shoppingHandlers, ...workoutHandlers, ...profileHandlers, ...progressHandlers, ...checkInHandlers, ...billingHandlers, ...notificationHandlers, ...chatHandlers, ...coachHandlers, ...coachNewStudentHandlers, ...coachStudentHandlers, ...coachPlanHandlers, ...coachDietHandlers, ...coachCheckInHandlers, ...coachChatHandlers, ...coachNotificationHandlers, ...coachFinanceHandlers]
+export const handlers = [...authHandlers, ...homeHandlers, ...waterHandlers, ...dietHandlers, ...shoppingHandlers, ...workoutHandlers, ...profileHandlers, ...progressHandlers, ...checkInHandlers, ...billingHandlers, ...notificationHandlers, ...chatHandlers, ...coachHandlers, ...coachNewStudentHandlers, ...coachStudentHandlers, ...coachPlanHandlers, ...coachDietHandlers, ...coachCheckInHandlers, ...coachChatHandlers, ...coachNotificationHandlers, ...coachFinanceHandlers, ...coachLibraryHandlers]
 
 export { resetDb, setLatency, setScenario, type Scenario } from '../db'

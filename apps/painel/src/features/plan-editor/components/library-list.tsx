@@ -70,7 +70,7 @@ export function LibraryList({ library, actionLabel, onPick, variant }: LibraryLi
         {shown.length === 0 && <li className="px-2 py-4 text-[13px] text-muted-foreground">Nenhum exercício encontrado.</li>}
       </ul>
       {variant === 'aside' && (
-        <Link to="/biblioteca" className="flex h-10 shrink-0 items-center justify-center rounded-xl border border-dashed border-line-strong text-[13px] font-bold text-foreground-2 outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
+        <Link to="/biblioteca?novo=1" className="flex h-10 shrink-0 items-center justify-center rounded-xl border border-dashed border-line-strong text-[13px] font-bold text-foreground-2 outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
           + Cadastrar exercício com vídeo
         </Link>
       )}

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
-import { ChevronRight, ClipboardCheck, Image, PencilLine, Play, Trophy, Utensils, Video } from 'lucide-react'
+import { BookOpen, ChevronRight, ClipboardCheck, Image, PencilLine, Play, Trophy, Utensils, Video } from 'lucide-react'
 import { audioDuration, chatTimeline, messageTime, type CoachMessage } from '@workspace/core'
 import { cn } from '@workspace/ui/lib/utils'
 
@@ -9,6 +9,7 @@ const events = {
   checkIn: { icon: ClipboardCheck, tone: 'bg-info/16 text-info' },
   plan: { icon: PencilLine, tone: 'bg-primary/14 text-primary' },
   diet: { icon: Utensils, tone: 'bg-fat/16 text-fat' },
+  exercise: { icon: BookOpen, tone: 'bg-violet/16 text-violet' },
 }
 const statusText = { sent: 'Enviada', delivered: 'Entregue', read: 'Lida' } as const
 

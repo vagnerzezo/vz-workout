@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { Link } from 'react-router'
-import { ChevronRight, ClipboardCheck, Pause, PencilLine, Play, Trophy, Utensils } from 'lucide-react'
+import { BookOpen, ChevronRight, ClipboardCheck, Pause, PencilLine, Play, Trophy, Utensils } from 'lucide-react'
 import type { Message } from '@workspace/core'
 import { audioDuration, messageTime } from '@workspace/core'
 import { cn } from '@workspace/ui/lib/utils'
@@ -11,6 +11,7 @@ const events = {
   checkIn: { icon: ClipboardCheck, tone: 'bg-info/16 text-info' },
   plan: { icon: PencilLine, tone: 'bg-primary/14 text-primary' },
   diet: { icon: Utensils, tone: 'bg-fat/16 text-fat' },
+  exercise: { icon: BookOpen, tone: 'bg-violet/16 text-violet' },
 }
 
 const statusText = (m: Message) => (m.id.startsWith(PENDING) ? 'Enviando…' : m.status === 'read' ? 'Lida' : 'Enviada')
