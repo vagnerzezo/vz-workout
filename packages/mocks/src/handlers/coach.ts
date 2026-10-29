@@ -6,6 +6,7 @@ import { coachStudents, filterTags } from '../fixtures/coach-students'
 import { renatoMe } from '../fixtures/renato'
 import { isOverdue } from '@workspace/core'
 import { unreadChats } from './coach-chat'
+import { unreadCoachNotifications } from './coach-notifications'
 import { coachCheckIns } from './coach-checkins'
 import { allSessions } from './workout'
 
@@ -42,7 +43,7 @@ export const coachHandlers = [
 
   http.get('/api/coach/counters', async () => {
     await latency()
-    return HttpResponse.json<CoachCounters>({ ...kaueCounters, students: activeCount(), pendingCheckIns: coachCheckIns(new Date()).waiting.length, unreadChats: unreadChats(new Date()) })
+    return HttpResponse.json<CoachCounters>({ ...kaueCounters, students: activeCount(), pendingCheckIns: coachCheckIns(new Date()).waiting.length, unreadChats: unreadChats(new Date()), unreadNotifications: unreadCoachNotifications(new Date()) })
   }),
 
   http.get('/api/coach/dashboard', async () => {

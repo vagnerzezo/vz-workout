@@ -2,11 +2,13 @@ import { http, HttpResponse } from 'msw'
 import type { AppNotification } from '@workspace/core'
 import { currentScenario, db, latency } from '../db'
 import { renatoNotifications } from '../fixtures/renato-notifications'
+import { coachNotificationsForRenato } from './coach-notifications'
 
 /** Caixa de notificações; o aluno novo ainda não tem nenhuma. */
 export function inbox(now: Date): AppNotification[] {
   if (currentScenario() === 'novo') return []
-  return renatoNotifications(now).map((n) => ({ ...n, read: !db.unreadNotifications.includes(n.id) }))
+  // As que o treinador enviou pelo painel entram no topo
+  return [...coachNotificationsForRenato(), ...renatoNotifications(now)].map((n) => ({ ...n, read: !db.unreadNotifications.includes(n.id) }))
 }
 
 export const notificationHandlers = [
