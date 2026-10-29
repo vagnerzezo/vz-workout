@@ -5,7 +5,7 @@ import { foodMacros, macroTargets, templateTotals } from './macros'
 import { scaleMeals } from './scaling'
 import { equivalentGrams, substitutionCount } from './substitutions'
 
-const food = (id: string, kcal: number, protein: number, carbs: number, fat: number): Food => ({ id, name: id, per100: { kcal, protein, carbs, fat }, unit: null, unitGrams: null, alternatives: [] })
+const food = (id: string, kcal: number, protein: number, carbs: number, fat: number): Food => ({ id, name: id, group: 'carbs', per100: { kcal, protein, carbs, fat }, unit: null, unitGrams: null, alternatives: [] })
 const arroz = food('arroz', 128, 2.5, 28.1, 0.2)
 const batata = food('batata', 77, 0.6, 18.4, 0.1)
 const frango = food('frango', 159, 32, 0, 2.5)

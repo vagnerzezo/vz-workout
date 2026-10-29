@@ -19,6 +19,7 @@ import { exerciseLibrary } from '../fixtures/renato-plan'
 import { renatoMeasurements } from '../fixtures/renato-progress'
 import { coachPlan, editablePlan, hiddenDays } from '../live-plan'
 import { students } from './coach'
+import { coachDietPlan } from './coach-diets'
 import { allSessions } from './workout'
 
 const day = (now: Date, offset: number) => {
@@ -221,15 +222,12 @@ function planOf(s: StudentListItem): CoachStudentPlan {
   return { plan, exercises: exerciseLibrary.filter((e) => used.has(e.id)), hiddenDayIds: hiddenDays(s.id) }
 }
 
+/** O Renato segue com a dieta da nutricionista (a do app) até o treinador atribuir outra; os demais têm a do painel. */
 function dietOf(s: StudentListItem): CoachStudentDiet {
-  if (s.status === 'pending') return { plan: null, waterGoalMl: 3500, adherence7d: null, author: null }
-  const renato = s.id === renatoMe.id
-  return {
-    plan: renato ? renatoDiet : { ...renatoDiet, id: `diet_${s.id}`, authorRole: 'coach' },
-    waterGoalMl: 3500,
-    adherence7d: renato ? 86 : 60 + (seedOf(s.id) % 38),
-    author: renato ? { name: 'Paula Mendes', credential: 'CRN-2 12345' } : null,
-  }
+  const nutri = s.id === renatoMe.id && !db.coach.dietAssignments[s.id]
+  if (nutri) return { plan: renatoDiet, waterGoalMl: 3500, adherence7d: 86, author: { name: 'Paula Mendes', credential: 'CRN-2 12345' } }
+  const plan = coachDietPlan(s)
+  return { plan, waterGoalMl: 3500, adherence7d: plan && s.status !== 'pending' ? 60 + (seedOf(s.id) % 38) : null, author: null }
 }
 
 /** Renato: as dobras do canvas e as medidas que ele já vê no Progresso do app. */

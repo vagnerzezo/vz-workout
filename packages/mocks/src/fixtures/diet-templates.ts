@@ -1,43 +1,43 @@
-import type { DietTemplate, Food, TemplateMeal } from '@workspace/core'
+import type { DietTemplate, Food, FoodGroup, TemplateMeal } from '@workspace/core'
 import { toIsoDate } from '@workspace/core'
 
-const food = (id: string, name: string, kcal: number, protein: number, carbs: number, fat: number, unit: [string, number] | null, alternatives: string[] = []): Food => ({
-  id, name, per100: { kcal, protein, carbs, fat }, unit: unit?.[0] ?? null, unitGrams: unit?.[1] ?? null, alternatives,
+const food = (id: string, name: string, group: FoodGroup, kcal: number, protein: number, carbs: number, fat: number, unit: [string, number] | null, alternatives: string[] = []): Food => ({
+  id, name, group, per100: { kcal, protein, carbs, fat }, unit: unit?.[0] ?? null, unitGrams: unit?.[1] ?? null, alternatives,
 })
 
 /** Tabela de alimentos do editor (por 100 g, aproximada da TACO; suplementos pelo rótulo). Os 21 primeiros são os do canvas. */
 export const foodTable: Food[] = [
-  food('pao', 'Pão francês', 300, 8, 58.6, 3.1, ['un.', 50], ['tapioca', 'cuscuz']),
-  food('tapioca', 'Goma de tapioca', 240, 0, 60, 0, null, ['pao', 'cuscuz']),
-  food('cuscuz', 'Cuscuz de milho cozido', 113, 2.2, 25.3, 0.7, null, ['pao', 'tapioca']),
-  food('ovo', 'Ovo de galinha inteiro', 146, 13.3, 0.6, 9.5, ['un.', 50], ['queijo']),
-  food('queijo', 'Queijo minas frescal', 264, 17.4, 3.2, 20.2, null, ['ovo']),
-  food('mamao', 'Mamão papaia', 40, 0.5, 10.4, 0.1, null, ['banana', 'maca']),
-  food('banana', 'Banana prata', 98, 1.3, 26, 0.1, ['un.', 70], ['maca', 'mamao']),
-  food('maca', 'Maçã fuji', 56, 0.3, 15.2, 0, ['un.', 130], ['banana', 'mamao']),
-  food('iogurte', 'Iogurte natural', 51, 4.1, 1.9, 3, ['pote', 170]),
-  food('aveia', 'Aveia em flocos', 394, 13.9, 66.6, 8.5, ['colher de sopa', 15], ['tapioca']),
-  food('arroz_integral', 'Arroz integral cozido', 124, 2.6, 25.8, 1, null, ['arroz_branco', 'batata_doce']),
-  food('arroz_branco', 'Arroz branco cozido', 128, 2.5, 28.1, 0.2, null, ['arroz_integral', 'batata_doce']),
-  food('feijao', 'Feijão carioca cozido', 76, 4.8, 13.6, 0.5, ['concha', 100], ['lentilha']),
-  food('frango', 'Peito de frango grelhado', 159, 32, 0, 2.5, null, ['patinho', 'tilapia']),
-  food('patinho', 'Patinho moído grelhado', 219, 35.9, 0, 7.3, null, ['frango', 'tilapia']),
-  food('tilapia', 'Filé de tilápia grelhado', 96, 20.1, 0, 1.7, null, ['frango', 'patinho']),
-  food('batata_doce', 'Batata-doce cozida', 77, 0.6, 18.4, 0.1, null, ['arroz_branco', 'arroz_integral']),
-  food('brocolis', 'Brócolis cozido', 25, 2.1, 4.4, 0.5, null),
-  food('azeite', 'Azeite de oliva', 884, 0, 0, 100, ['colher de sopa', 8]),
-  food('whey', 'Whey protein (rótulo)', 400, 80, 8, 6, ['scoop', 30]),
-  food('amendoim', 'Pasta de amendoim', 590, 25, 20, 50, ['colher de sopa', 15], ['castanha']),
+  food('pao', 'Pão francês', 'carbs', 300, 8, 58.6, 3.1, ['un.', 50], ['tapioca', 'cuscuz']),
+  food('tapioca', 'Goma de tapioca', 'carbs', 240, 0, 60, 0, null, ['pao', 'cuscuz']),
+  food('cuscuz', 'Cuscuz de milho cozido', 'carbs', 113, 2.2, 25.3, 0.7, null, ['pao', 'tapioca']),
+  food('ovo', 'Ovo de galinha inteiro', 'protein', 146, 13.3, 0.6, 9.5, ['un.', 50], ['queijo']),
+  food('queijo', 'Queijo minas frescal', 'dairy', 264, 17.4, 3.2, 20.2, null, ['ovo']),
+  food('mamao', 'Mamão papaia', 'fruit', 40, 0.5, 10.4, 0.1, null, ['banana', 'maca']),
+  food('banana', 'Banana prata', 'fruit', 98, 1.3, 26, 0.1, ['un.', 70], ['maca', 'mamao']),
+  food('maca', 'Maçã fuji', 'fruit', 56, 0.3, 15.2, 0, ['un.', 130], ['banana', 'mamao']),
+  food('iogurte', 'Iogurte natural', 'dairy', 51, 4.1, 1.9, 3, ['pote', 170]),
+  food('aveia', 'Aveia em flocos', 'carbs', 394, 13.9, 66.6, 8.5, ['colher de sopa', 15], ['tapioca']),
+  food('arroz_integral', 'Arroz integral cozido', 'carbs', 124, 2.6, 25.8, 1, null, ['arroz_branco', 'batata_doce']),
+  food('arroz_branco', 'Arroz branco cozido', 'carbs', 128, 2.5, 28.1, 0.2, null, ['arroz_integral', 'batata_doce']),
+  food('feijao', 'Feijão carioca cozido', 'carbs', 76, 4.8, 13.6, 0.5, ['concha', 100], ['lentilha']),
+  food('frango', 'Peito de frango grelhado', 'protein', 159, 32, 0, 2.5, null, ['patinho', 'tilapia']),
+  food('patinho', 'Patinho moído grelhado', 'protein', 219, 35.9, 0, 7.3, null, ['frango', 'tilapia']),
+  food('tilapia', 'Filé de tilápia grelhado', 'protein', 96, 20.1, 0, 1.7, null, ['frango', 'patinho']),
+  food('batata_doce', 'Batata-doce cozida', 'carbs', 77, 0.6, 18.4, 0.1, null, ['arroz_branco', 'arroz_integral']),
+  food('brocolis', 'Brócolis cozido', 'vegetables', 25, 2.1, 4.4, 0.5, null),
+  food('azeite', 'Azeite de oliva', 'fats', 884, 0, 0, 100, ['colher de sopa', 8]),
+  food('whey', 'Whey protein (rótulo)', 'protein', 400, 80, 8, 6, ['scoop', 30]),
+  food('amendoim', 'Pasta de amendoim', 'fats', 590, 25, 20, 50, ['colher de sopa', 15], ['castanha']),
   // Usados nas outras dietas
-  food('castanha', 'Castanha-do-pará', 643, 14.5, 15.1, 63.5, ['un.', 4], ['amendoim']),
-  food('macarrao', 'Macarrão cozido', 102, 3.4, 19.9, 1.2, null, ['arroz_branco', 'batata_doce']),
-  food('salmao', 'Salmão grelhado', 243, 26.1, 0, 14.5, null, ['tilapia', 'frango']),
-  food('tofu', 'Tofu firme', 81, 8.5, 2, 4.2, null, ['ovo']),
-  food('lentilha', 'Lentilha cozida', 93, 6.3, 16.3, 0.5, ['concha', 100], ['feijao', 'grao_de_bico']),
-  food('grao_de_bico', 'Grão-de-bico cozido', 164, 8.9, 27.4, 2.6, null, ['lentilha', 'feijao']),
-  food('abacate', 'Abacate', 96, 1.2, 6, 8.4, null),
-  food('salada', 'Salada de folhas e tomate', 15, 1, 2.8, 0.2, null),
-  food('cottage', 'Queijo cottage', 98, 11.1, 3.4, 4.3, null, ['queijo']),
+  food('castanha', 'Castanha-do-pará', 'fats', 643, 14.5, 15.1, 63.5, ['un.', 4], ['amendoim']),
+  food('macarrao', 'Macarrão cozido', 'carbs', 102, 3.4, 19.9, 1.2, null, ['arroz_branco', 'batata_doce']),
+  food('salmao', 'Salmão grelhado', 'protein', 243, 26.1, 0, 14.5, null, ['tilapia', 'frango']),
+  food('tofu', 'Tofu firme', 'protein', 81, 8.5, 2, 4.2, null, ['ovo']),
+  food('lentilha', 'Lentilha cozida', 'carbs', 93, 6.3, 16.3, 0.5, ['concha', 100], ['feijao', 'grao_de_bico']),
+  food('grao_de_bico', 'Grão-de-bico cozido', 'carbs', 164, 8.9, 27.4, 2.6, null, ['lentilha', 'feijao']),
+  food('abacate', 'Abacate', 'fats', 96, 1.2, 6, 8.4, null),
+  food('salada', 'Salada de folhas e tomate', 'vegetables', 15, 1, 2.8, 0.2, null),
+  food('cottage', 'Queijo cottage', 'dairy', 98, 11.1, 3.4, 4.3, null, ['queijo']),
 ]
 
 type F = [foodId: string, grams: number, substitutes?: string[]]

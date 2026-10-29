@@ -152,7 +152,7 @@ describe('Perfil do aluno', () => {
     renderApp('/alunos/stu_marcos?aba=dieta')
     const plans = await screen.findByRole('region', { name: 'Fichas de dieta' }, { timeout: 3000 })
     const edit = within(plans).getAllByRole('link', { name: 'Editar' })[0]!
-    expect(edit.getAttribute('href')).toMatch(/^\/dietas\/diet_stu_marcos\?aluno=stu_marcos&ficha=/)
+    expect(edit.getAttribute('href')).toBe('/dietas/diet_recomp_treino?aluno=stu_marcos')
     expect(within(plans).getByRole('link', { name: '+ Nova ficha de dieta' })).toHaveAttribute('href', '/dietas/nova?aluno=stu_marcos')
   })
 

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Link, useBlocker, useParams, useSearchParams } from 'react-router'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ChevronLeft, MoreHorizontal, Pencil } from 'lucide-react'
 import {
@@ -16,22 +16,13 @@ import {
   type WorkoutDay,
   type WorkoutPlan,
 } from '@workspace/core'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@workspace/ui/components/alert-dialog'
 import { Button } from '@workspace/ui/components/button'
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@workspace/ui/components/drawer'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@workspace/ui/components/dropdown-menu'
 import { Skeleton } from '@workspace/ui/components/skeleton'
 import { cn } from '@workspace/ui/lib/utils'
 import { ErrorState } from '../../../shared/components/error-state'
+import { UnsavedChangesDialog } from '../../../shared/components/unsaved-changes-dialog'
 import { useIsDesktop } from '../../../shared/hooks/use-is-desktop'
 import { AssignPlanDrawer } from '../../plans/components/assign-plan-drawer'
 import { useStudents } from '../../students/api/queries'
@@ -85,9 +76,6 @@ export default function PlanEditorPage() {
       dispatch({ type: 'load', plan: source })
     }
   }, [source, key, dispatch])
-
-  // Sair com alterações não salvas pede confirmação (trocar de dia ou de fase não conta)
-  const blocker = useBlocker(({ currentLocation, nextLocation }) => draft.dirty && currentLocation.pathname !== nextLocation.pathname)
 
   const backTo = studentId ? `/alunos/${studentId}?aba=treino` : '/fichas'
   const backLabel = studentId ? 'Voltar para o aluno' : 'Voltar para fichas de treino'
@@ -214,22 +202,7 @@ export default function PlanEditorPage() {
 
   const empty = <p className="rounded-[18px] border border-dashed border-line-strong p-8 text-center text-sm text-muted-foreground">{isDesktop ? 'Adicione exercícios pela biblioteca ao lado.' : 'Nenhum exercício neste dia.'}</p>
 
-  const leaveDialog = (
-    <AlertDialog open={blocker.state === 'blocked'} onOpenChange={(open) => !open && blocker.reset?.()}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle className="text-lg font-extrabold">Sair sem salvar?</AlertDialogTitle>
-          <AlertDialogDescription>As alterações desta ficha vão se perder.</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => blocker.reset?.()}>Continuar editando</AlertDialogCancel>
-          <AlertDialogAction variant="destructive" onClick={() => blocker.proceed?.()}>
-            Sair sem salvar
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  )
+  const leaveDialog = <UnsavedChangesDialog dirty={draft.dirty} what="desta ficha" />
 
   const assignDrawer = (
     <AssignPlanDrawer template={assigning} students={students.data?.students ?? []} preselected={[]} now={new Date()} onClose={() => setAssigning(null)} onAssigned={() => {}} />

@@ -1,10 +1,14 @@
 import { z } from 'zod'
 import { Macros } from './diet'
 
+export const FoodGroup = z.enum(['protein', 'carbs', 'fruit', 'dairy', 'vegetables', 'fats'])
+export type FoodGroup = z.infer<typeof FoodGroup>
+
 /** Alimento da tabela (valores por 100 g, aproximados da TACO; suplementos pelo rótulo). */
 export const Food = z.object({
   id: z.string(),
   name: z.string(),
+  group: FoodGroup,
   per100: Macros,
   /** Medida caseira: "un." de 50 g, "colher de sopa" de 15 g… null = pesado pronto */
   unit: z.string().nullable(),

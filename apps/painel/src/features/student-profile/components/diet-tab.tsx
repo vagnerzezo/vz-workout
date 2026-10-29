@@ -78,7 +78,7 @@ export function DietTab({ studentId }: { studentId: string }) {
                 </div>
                 <span className={cn('flex h-6 shrink-0 items-center rounded-full px-2 text-[11px] font-extrabold', className)}>{label}</span>
                 {canEdit && (
-                  <Link to={`/dietas/${plan.id}?aluno=${studentId}&ficha=${v.id}`} className={cn(buttonVariants({ variant: 'outline', size: 'sm', className: 'h-9 font-bold' }))}>
+                  <Link to={`/dietas/${v.id}?aluno=${studentId}`} className={cn(buttonVariants({ variant: 'outline', size: 'sm', className: 'h-9 font-bold' }))}>
                     Editar
                   </Link>
                 )}

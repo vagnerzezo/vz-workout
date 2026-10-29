@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import { addDays, addWeeks } from 'date-fns'
-import type { CoachDiets, DietTemplateSummary, Food } from '@workspace/core'
-import { AssignDiet, DietTemplate, parseIsoDate, substitutionCount, templateTargets, toIsoDate } from '@workspace/core'
+import type { CoachDiets, DietTemplateSummary, DietVariant, Food, MealFood, MealPlan, StudentListItem } from '@workspace/core'
+import { AssignDiet, DietTemplate, equivalentGrams, foodMacros, parseIsoDate, scaleMeals, substitutionCount, templateTargets, toIsoDate } from '@workspace/core'
 import { db, latency, newId } from '../db'
 import { coachStudents } from '../fixtures/coach-students'
 import { dietTemplates, foodTable, initialDietUsage, nutritionist } from '../fixtures/diet-templates'
@@ -61,12 +61,127 @@ function coachDiets(): CoachDiets {
 }
 
 const find = (id: unknown) => templates().find((t) => t.id === id)
+const foods = new Map(foodTable.map((f) => [f.id, f]))
+
+/** As dietas que o aluno tem hoje (atribuída na lista ou a do fixture) e se as porções seguem o peso dele. */
+function dietsOf(s: StudentListItem): { ids: string[]; scaled: boolean } | null {
+  const assigned = db.coach.dietAssignments[s.id]
+  if (assigned) return { ids: assigned.templateIds, scaled: assigned.scaled }
+  const ids = s.planEndsOn ? baseDiets().get(s.id) : undefined
+  return ids ? { ids, scaled: true } : null
+}
+
+/** A cópia do aluno: a editada no painel ou o modelo no peso dele. */
+function studentCopy(s: StudentListItem, templateId: string): DietTemplate | null {
+  const diets = dietsOf(s)
+  const t = find(templateId)
+  if (!t || !diets?.ids.includes(templateId)) return null
+  const saved = db.coach.studentDiets[s.id]?.[templateId]
+  if (saved) return saved
+  if (!diets.scaled) return structuredClone(t)
+  const w = weightOf(s, new Date())
+  const k = w / t.reference.weightKg
+  return { ...structuredClone(t), reference: { ...t.reference, weightKg: w }, manualKcal: t.manualKcal && Math.round(t.manualKcal * k), meals: scaleMeals(t.meals, t.reference.weightKg, w) }
+}
+
+const r1 = (n: number) => Math.round(n * 10) / 10
+
+/** A dieta em gramas no formato que o app (e a aba Dieta do perfil) mostra. */
+function toVariant(t: DietTemplate): DietVariant {
+  const meals = t.meals.map((m) => ({
+    id: m.id,
+    name: m.name,
+    time: m.time,
+    note: null,
+    foods: m.foods.flatMap((row): MealFood[] => {
+      const food = foods.get(row.foodId)
+      if (!food) return []
+      const mac = foodMacros(food, row.grams)
+      const portion = (f: Food, g: number) => ({ foodId: f.id, name: f.name, portion: `${g} g`, ...Object.fromEntries(Object.entries(foodMacros(f, g)).map(([k, v]) => [k, r1(v)])) }) as MealFood
+      return [
+        {
+          ...portion(food, row.grams),
+          kcal: r1(mac.kcal),
+          substitutes: row.substitutes.flatMap((id) => {
+            const sub = foods.get(id)
+            return sub ? [portion(sub, equivalentGrams(food, sub, row.grams))] : []
+          }),
+          groceries: [],
+        },
+      ]
+    }),
+  }))
+  return { id: t.id, label: t.appLabel, kind: /descanso/i.test(t.appLabel) ? 'rest' : 'training', goals: templateTargets(t).targets, meals }
+}
+
+/** Plano de dieta do aluno montado pelo treinador (null = sem dieta). */
+export function coachDietPlan(s: StudentListItem): MealPlan | null {
+  const diets = dietsOf(s)
+  const copies = diets?.ids.flatMap((id) => studentCopy(s, id) ?? []) ?? []
+  if (copies.length === 0) return null
+  return { id: `diet_${s.id}`, updatedAt: copies.map((c) => c.updatedAt).sort().at(-1)!, authorRole: 'coach', notes: [{ title: 'Orientações', text: copies[0]!.notes }], variants: copies.map(toVariant) }
+}
+
+const findStudent = (id: unknown) => students(new Date()).find((s) => s.id === id)
 const notFound = () => HttpResponse.json({ message: 'Dieta não encontrada' }, { status: 404 })
 
 export const coachDietHandlers = [
   http.get('/api/coach/diets', async () => {
     await latency()
     return HttpResponse.json<CoachDiets>(coachDiets())
+  }),
+
+  // "Nova ficha de dieta": um modelo com café, almoço e jantar vazios, que o editor abre em seguida
+  http.post('/api/coach/diets', async () => {
+    await latency()
+    const id = newId('diet')
+    const t: DietTemplate = {
+      id, name: 'Nova dieta', appLabel: 'Dieta', goal: 'recomposition', reference: { weightKg: 75, heightCm: 172, age: 30, sex: 'male' }, activityFactor: 1.55, calorieMode: 'maintenance', manualKcal: null, proteinPerKg: 1.8, fatPerKg: 0.8,
+      meals: [['Café da manhã', '07:30'], ['Almoço', '12:30'], ['Jantar', '20:00']].map(([name, time], i) => ({ id: `${id}_m${i + 1}`, name: name!, time: time!, foods: [] })),
+      notes: '', updatedAt: toIsoDate(new Date()), archived: false,
+    }
+    templates().unshift(t)
+    return HttpResponse.json<DietTemplateSummary>(summaryOf(t, 0), { status: 201 })
+  }),
+
+  http.get('/api/coach/diets/:id', async ({ params }) => {
+    const t = find(params.id)
+    if (!t) return notFound()
+    await latency()
+    return HttpResponse.json<DietTemplate>(t)
+  }),
+
+  // "Salvar" no editor: a ficha inteira (o card da lista recalcula metas, refeições e substituições)
+  http.put('/api/coach/diets/:id', async ({ params, request }) => {
+    const t = find(params.id)
+    if (!t) return notFound()
+    const body = (await request.json().catch(() => null)) as { template?: unknown } | null
+    const parsed = DietTemplate.safeParse(body?.template)
+    if (!parsed.success) return HttpResponse.json({ message: 'Dieta inválida', issues: parsed.error.issues }, { status: 422 })
+    await latency()
+    Object.assign(t, { ...parsed.data, id: t.id, archived: t.archived, updatedAt: toIsoDate(new Date()) })
+    return HttpResponse.json<DietTemplate>(t)
+  }),
+
+  // Cópia de um aluno (editor aberto pela aba Dieta do perfil)
+  http.get('/api/coach/students/:sid/diets/:id', async ({ params }) => {
+    const s = findStudent(params.sid)
+    const copy = s && studentCopy(s, params.id as string)
+    if (!copy) return notFound()
+    await latency()
+    return HttpResponse.json<DietTemplate>(copy)
+  }),
+
+  http.put('/api/coach/students/:sid/diets/:id', async ({ params, request }) => {
+    const s = findStudent(params.sid)
+    if (!s || !studentCopy(s, params.id as string)) return notFound()
+    const body = (await request.json().catch(() => null)) as { template?: unknown } | null
+    const parsed = DietTemplate.safeParse(body?.template)
+    if (!parsed.success) return HttpResponse.json({ message: 'Dieta inválida' }, { status: 422 })
+    await latency()
+    const saved = { ...parsed.data, id: params.id as string, updatedAt: toIsoDate(new Date()) }
+    db.coach.studentDiets[s.id] = { ...db.coach.studentDiets[s.id], [saved.id]: saved }
+    return HttpResponse.json<DietTemplate>(saved)
   }),
 
   // Tabela de alimentos do editor
