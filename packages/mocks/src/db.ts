@@ -38,7 +38,7 @@ type Db = {
   /** Quem aceitou o convite (primeiro acesso): a API passa a responder como aluna nova */
   newStudent: { fullName: string; anamnesis: Anamnesis | null } | null
   /** Painel do treinador: itens de atenção já resolvidos e aniversariantes já parabenizados */
-  coach: { resolvedAttention: string[]; congratulated: string[]; archived: string[]; unarchived: string[]; resentInvites: string[]; addedTags: Record<string, string[]>; settings: Record<string, StudentAppSettings>; answeredCheckIns: string[]; plans: Record<string, WorkoutPlan>; hiddenDays: Record<string, string[]>; created: CreatedStudent[]; templates: PlanTemplateSummary[] | null; templatePlans: Record<string, WorkoutPlan>; planAssignments: Record<string, PlanAssignment>; dietTemplates: DietTemplate[] | null; dietAssignments: Record<string, DietAssignment>; studentDiets: Record<string, Record<string, DietTemplate>> }
+  coach: { resolvedAttention: string[]; congratulated: string[]; archived: string[]; unarchived: string[]; resentInvites: string[]; addedTags: Record<string, string[]>; settings: Record<string, StudentAppSettings>; plans: Record<string, WorkoutPlan>; hiddenDays: Record<string, string[]>; created: CreatedStudent[]; templates: PlanTemplateSummary[] | null; templatePlans: Record<string, WorkoutPlan>; planAssignments: Record<string, PlanAssignment>; dietTemplates: DietTemplate[] | null; dietAssignments: Record<string, DietAssignment>; studentDiets: Record<string, Record<string, DietTemplate>>; checkInReplies: Record<string, { text: string; at: string }>; checkInReminders: Record<string, string> }
   nextId: number
 }
 
@@ -89,7 +89,7 @@ const initial = (): Db => ({
   loginAttempts: 0,
   recovery: null,
   newStudent: null,
-  coach: { resolvedAttention: [], congratulated: [], archived: [], unarchived: [], resentInvites: [], addedTags: {}, settings: {}, answeredCheckIns: [], plans: {}, hiddenDays: {}, created: [], templates: null, templatePlans: {}, planAssignments: {}, dietTemplates: null, dietAssignments: {}, studentDiets: {} },
+  coach: { resolvedAttention: [], congratulated: [], archived: [], unarchived: [], resentInvites: [], addedTags: {}, settings: {}, plans: {}, hiddenDays: {}, created: [], templates: null, templatePlans: {}, planAssignments: {}, dietTemplates: null, dietAssignments: {}, studentDiets: {}, checkInReplies: {}, checkInReminders: {} },
   nextId: 1,
 })
 

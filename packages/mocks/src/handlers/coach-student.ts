@@ -197,19 +197,21 @@ function checkInsOf(s: StudentListItem, now: Date): StudentCheckIn[] {
     }
   }
   const list = [answered(-14, 0), answered(-28, 1), answered(-42, 2)]
-  if (s.id === renatoMe.id && !db.coach.answeredCheckIns.includes('ci_renato_9')) {
+  // O check-in de hoje do Renato: aguardando até o treinador responder na fila de check-ins
+  if (s.id === renatoMe.id) {
+    const reply = db.coach.checkInReplies.ci_renato_9
     list.unshift({
       id: 'ci_renato_9',
       date: iso(now, 0),
       kind: 'quinzenal',
-      status: 'waiting',
+      status: reply ? 'answered' : 'waiting',
       summary: 'Enviado hoje · relatou dor no joelho',
-      answeredOn: null,
+      answeredOn: reply ? toIsoDate(new Date(reply.at)) : null,
       poses: ['front', 'side', 'back'],
       ratings: [4, 3, 2, 4, 5].map((value, k) => ({ label: RATING_LABELS[k]!, value })),
       comment: 'Treinos bem, mas o joelho direito incomodou no hack. Dieta tranquila.',
       pain: 'Joelho direito, na descida do agachamento hack (intensidade 4 de 10)',
-      reply: null,
+      reply: reply?.text ?? null,
     })
   }
   return list

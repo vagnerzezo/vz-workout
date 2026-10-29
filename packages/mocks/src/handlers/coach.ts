@@ -4,6 +4,8 @@ import { currentScenario, db, latency } from '../db'
 import { kaueCoach, kaueCounters, kaueDashboard } from '../fixtures/coach'
 import { coachStudents, filterTags } from '../fixtures/coach-students'
 import { renatoMe } from '../fixtures/renato'
+import { isOverdue } from '@workspace/core'
+import { coachCheckIns } from './coach-checkins'
 import { allSessions } from './workout'
 
 /** Carteira do treinador com o que já foi arquivado ou reativado nesta sessão. */
@@ -39,17 +41,21 @@ export const coachHandlers = [
 
   http.get('/api/coach/counters', async () => {
     await latency()
-    return HttpResponse.json<CoachCounters>({ ...kaueCounters, students: activeCount() })
+    return HttpResponse.json<CoachCounters>({ ...kaueCounters, students: activeCount(), pendingCheckIns: coachCheckIns(new Date()).waiting.length })
   }),
 
   http.get('/api/coach/dashboard', async () => {
     await latency()
     if (currentScenario() === 'erro') return failed()
-    const dashboard = kaueDashboard(new Date())
+    const now = new Date()
+    const dashboard = kaueDashboard(now)
+    const { waiting } = coachCheckIns(now)
     return HttpResponse.json<CoachDashboard>({
       ...dashboard,
       activeStudents: { ...dashboard.activeStudents, count: activeCount() },
-      attention: dashboard.attention.filter((a) => !db.coach.resolvedAttention.includes(a.id)),
+      pendingCheckIns: { count: waiting.length, over48h: waiting.filter((c) => isOverdue(c, now)).length },
+      // Check-in respondido sai da atenção
+      attention: dashboard.attention.filter((a) => !db.coach.resolvedAttention.includes(a.id) && !(a.targetId && db.coach.checkInReplies[a.targetId])),
       birthdays: dashboard.birthdays.map((b) => ({ ...b, congratulated: db.coach.congratulated.includes(b.studentId) })),
     })
   }),
