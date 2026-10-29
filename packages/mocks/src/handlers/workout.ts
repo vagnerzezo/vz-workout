@@ -3,7 +3,8 @@ import type { HistorySession, MonthHistory, SessionTemplate, StudentPlan, Workou
 import { FinishSessionRequest, LoggedSet, shiftMonth, YearMonth, yearMonthOf } from '@workspace/core'
 import { currentScenario, db, finishedThisWeek, latency, newId } from '../db'
 import { doneDayIds } from '../fixtures/renato'
-import { exerciseLibrary, renatoPlan } from '../fixtures/renato-plan'
+import { exerciseLibrary } from '../fixtures/renato-plan'
+import { appPlan } from '../live-plan'
 import { sessionItem } from '../fixtures/renato-sessions'
 import { generatedHistory, historyFromSession } from '../fixtures/renato-history'
 
@@ -18,10 +19,11 @@ export const workoutHandlers = [
       return HttpResponse.json<StudentPlan>({ plan: null, exercises: [], doneThisWeek: [] })
     }
     const today = new Date()
-    const used = new Set(renatoPlan.days.flatMap((d) => d.exercises.map((e) => e.exerciseId)))
-    const done = scenario === 'novo' ? [] : doneDayIds(renatoPlan, today)
+    const plan = appPlan()
+    const used = new Set(plan.days.flatMap((d) => d.exercises.map((e) => e.exerciseId)))
+    const done = scenario === 'novo' ? [] : doneDayIds(plan, today)
     return HttpResponse.json<StudentPlan>({
-      plan: renatoPlan,
+      plan,
       exercises: exerciseLibrary.filter((e) => used.has(e.id)),
       doneThisWeek: [...new Set([...done, ...finishedThisWeek(today).map((f) => f.dayId)])],
     })
@@ -30,12 +32,13 @@ export const workoutHandlers = [
   http.get('/api/me/workout-days/:dayId/template', async ({ params }) => {
     await latency()
     if (currentScenario() === 'erro') return failed()
-    const day = renatoPlan.days.find((d) => d.id === params.dayId)
+    const plan = appPlan()
+    const day = plan.days.find((d) => d.id === params.dayId)
     if (!day) return HttpResponse.json({ message: 'Treino não encontrado' }, { status: 404 })
     const used = new Set(day.exercises.map((e) => e.exerciseId))
     return HttpResponse.json<SessionTemplate>({
       day,
-      phase: renatoPlan.phases.find((p) => p.id === renatoPlan.currentPhaseId) ?? null,
+      phase: plan.phases.find((p) => p.id === plan.currentPhaseId) ?? null,
       exercises: exerciseLibrary.filter((e) => used.has(e.id)),
       items: day.exercises.map(sessionItem),
     })
@@ -85,7 +88,7 @@ export const workoutHandlers = [
       month: month.data,
       sessions: inMonth(month.data),
       previousMonthVolumeKg: previousVolume || null,
-      weeklyGoal: renatoPlan.days.length,
+      weeklyGoal: appPlan().days.length,
       firstMonth: all.at(-1)?.date.slice(0, 7) ?? yearMonthOf(today),
     })
   }),

@@ -3,12 +3,16 @@ import type { Coach, CoachCounters, CoachDashboard, StudentList, StudentListItem
 import { currentScenario, db, latency } from '../db'
 import { kaueCoach, kaueCounters, kaueDashboard } from '../fixtures/coach'
 import { coachStudents, filterTags } from '../fixtures/coach-students'
+import { renatoMe } from '../fixtures/renato'
+import { allSessions } from './workout'
 
 /** Carteira do treinador com o que já foi arquivado ou reativado nesta sessão. */
-function students(now: Date): StudentListItem[] {
+export function students(now: Date): StudentListItem[] {
   return coachStudents(now).map((student) => {
     const added = db.coach.addedTags[student.id] ?? []
     const s = { ...student, tags: [...new Set([...student.tags, ...added])] }
+    // O Renato é o aluno do app: o último treino vem das sessões dele (inclui as que ele salvar agora)
+    if (s.id === renatoMe.id) s.lastWorkoutOn = allSessions(now, false)[0]?.date ?? s.lastWorkoutOn
     if (db.coach.archived.includes(s.id)) return { ...s, status: 'archived' }
     if (db.coach.unarchived.includes(s.id)) return { ...s, status: 'active' }
     return s
