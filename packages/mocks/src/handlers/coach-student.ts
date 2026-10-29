@@ -91,6 +91,11 @@ function weightsOf(s: StudentListItem, now: Date) {
   return s.id === renatoMe.id ? db.weights : generatedWeights(s, now)
 }
 
+/** Peso atual. Pendentes ainda não pesaram: o da anamnese (estimado pelo seed, como o canvas mostra). */
+export function weightOf(s: StudentListItem, now: Date): number {
+  return weightsOf(s, now).at(-1)?.kg ?? 55 + (seedOf(s.id) % 35)
+}
+
 const createdOf = (s: Pick<StudentListItem, 'id'>) => db.coach.created.find((c) => c.student.id === s.id)
 
 /** WhatsApp do aluno. O do Pedro é o do canvas (o "número já cadastrado" do Novo aluno). */

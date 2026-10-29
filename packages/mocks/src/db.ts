@@ -1,5 +1,5 @@
 import { delay } from 'msw'
-import type { NewStudent, PlanTemplateSummary, StudentAppSettings, StudentListItem, WorkoutPlan, Anamnesis, Charge, DietDay, LoggedSet, Message, NotificationSettings, ProgressPhoto, ShoppingListState, WaterLog, WeightEntry, WorkoutSession } from '@workspace/core'
+import type { DietTemplate, NewStudent, PlanTemplateSummary, StudentAppSettings, StudentListItem, WorkoutPlan, Anamnesis, Charge, DietDay, LoggedSet, Message, NotificationSettings, ProgressPhoto, ShoppingListState, WaterLog, WeightEntry, WorkoutSession } from '@workspace/core'
 import { toIsoDate } from '@workspace/core'
 import { initialWater, mondayOf, type FinishedSession } from './fixtures/renato'
 import { renatoLogin } from './fixtures/renato-auth'
@@ -38,12 +38,15 @@ type Db = {
   /** Quem aceitou o convite (primeiro acesso): a API passa a responder como aluna nova */
   newStudent: { fullName: string; anamnesis: Anamnesis | null } | null
   /** Painel do treinador: itens de atenção já resolvidos e aniversariantes já parabenizados */
-  coach: { resolvedAttention: string[]; congratulated: string[]; archived: string[]; unarchived: string[]; resentInvites: string[]; addedTags: Record<string, string[]>; settings: Record<string, StudentAppSettings>; answeredCheckIns: string[]; plans: Record<string, WorkoutPlan>; hiddenDays: Record<string, string[]>; created: CreatedStudent[]; templates: PlanTemplateSummary[] | null; templatePlans: Record<string, WorkoutPlan>; planAssignments: Record<string, PlanAssignment> }
+  coach: { resolvedAttention: string[]; congratulated: string[]; archived: string[]; unarchived: string[]; resentInvites: string[]; addedTags: Record<string, string[]>; settings: Record<string, StudentAppSettings>; answeredCheckIns: string[]; plans: Record<string, WorkoutPlan>; hiddenDays: Record<string, string[]>; created: CreatedStudent[]; templates: PlanTemplateSummary[] | null; templatePlans: Record<string, WorkoutPlan>; planAssignments: Record<string, PlanAssignment>; dietTemplates: DietTemplate[] | null; dietAssignments: Record<string, DietAssignment> }
   nextId: number
 }
 
 /** Ficha atribuída pela lista de fichas: substitui a que o aluno tinha. */
 export type PlanAssignment = { templateId: string; startsOn: string; endsOn: string }
+
+/** Dieta atribuída pela lista de dietas: substitui as que o aluno tinha. */
+export type DietAssignment = { templateIds: string[]; startsOn: string; endsOn: string; scaled: boolean }
 
 /** Aluno cadastrado pelo painel nesta sessão: fica pendente até usar o convite. */
 export type CreatedStudent = { student: StudentListItem; form: NewStudent; planLabel: string; code: string }
@@ -86,7 +89,7 @@ const initial = (): Db => ({
   loginAttempts: 0,
   recovery: null,
   newStudent: null,
-  coach: { resolvedAttention: [], congratulated: [], archived: [], unarchived: [], resentInvites: [], addedTags: {}, settings: {}, answeredCheckIns: [], plans: {}, hiddenDays: {}, created: [], templates: null, templatePlans: {}, planAssignments: {} },
+  coach: { resolvedAttention: [], congratulated: [], archived: [], unarchived: [], resentInvites: [], addedTags: {}, settings: {}, answeredCheckIns: [], plans: {}, hiddenDays: {}, created: [], templates: null, templatePlans: {}, planAssignments: {}, dietTemplates: null, dietAssignments: {} },
   nextId: 1,
 })
 

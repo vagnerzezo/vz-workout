@@ -3,15 +3,15 @@ import { ChevronRight } from 'lucide-react'
 import { initials, parseIsoDate, planDueTone, shortDate, type AssignedPlan } from '@workspace/core'
 import { cn } from '@workspace/ui/lib/utils'
 
-/** Aba "Atribuídas a alunos": a ficha de cada aluno abre na aba Treino do perfil, onde é ajustada. */
-export function AssignedList({ items, now }: { items: AssignedPlan[]; now: Date }) {
+/** Aba "Atribuídas a alunos": a ficha (ou dieta) de cada aluno abre na aba do perfil, onde é ajustada. */
+export function AssignedList({ items, now, profileTab = 'treino', label = 'Fichas dos alunos' }: { items: AssignedPlan[]; now: Date; profileTab?: 'treino' | 'dieta'; label?: string }) {
   if (items.length === 0) return <p className="rounded-[18px] border border-dashed border-line-strong p-6 text-center text-sm text-muted-foreground">Nenhuma ficha com esses filtros.</p>
   return (
-    <ul aria-label="Fichas dos alunos" className="grid gap-2 lg:grid-cols-2 xl:grid-cols-3">
+    <ul aria-label={label} className="grid gap-2 lg:grid-cols-2 xl:grid-cols-3">
       {items.map((a) => (
         <li key={a.studentId}>
           <Link
-            to={`/alunos/${a.studentId}?aba=treino`}
+            to={`/alunos/${a.studentId}?aba=${profileTab}`}
             className="flex items-center gap-3 rounded-[18px] border bg-card p-3.5 outline-none hover:border-input focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full border border-input bg-secondary text-xs font-extrabold">

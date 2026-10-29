@@ -3,6 +3,7 @@ import { billingHandlers } from './billing'
 import { chatHandlers } from './chat'
 import { checkInHandlers } from './checkin'
 import { coachHandlers } from './coach'
+import { coachDietHandlers } from './coach-diets'
 import { coachNewStudentHandlers } from './coach-new-student'
 import { coachPlanHandlers } from './coach-plans'
 import { coachStudentHandlers } from './coach-student'
@@ -15,6 +16,6 @@ import { shoppingHandlers } from './shopping'
 import { workoutHandlers } from './workout'
 
 // authHandlers primeiro: o 401 sem sessão vale para todas as rotas /api/me
-export const handlers = [...authHandlers, ...homeHandlers, ...waterHandlers, ...dietHandlers, ...shoppingHandlers, ...workoutHandlers, ...profileHandlers, ...progressHandlers, ...checkInHandlers, ...billingHandlers, ...notificationHandlers, ...chatHandlers, ...coachHandlers, ...coachNewStudentHandlers, ...coachStudentHandlers, ...coachPlanHandlers]
+export const handlers = [...authHandlers, ...homeHandlers, ...waterHandlers, ...dietHandlers, ...shoppingHandlers, ...workoutHandlers, ...profileHandlers, ...progressHandlers, ...checkInHandlers, ...billingHandlers, ...notificationHandlers, ...chatHandlers, ...coachHandlers, ...coachNewStudentHandlers, ...coachStudentHandlers, ...coachPlanHandlers, ...coachDietHandlers]
 
 export { resetDb, setLatency, setScenario, type Scenario } from '../db'

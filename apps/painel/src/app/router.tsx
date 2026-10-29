@@ -23,7 +23,7 @@ export const routes: RouteObject[] = [
       { path: 'fichas', ...page(() => import('../features/plans/pages/plans-page')) },
       { path: 'fichas/nova', ...page(() => import('../features/plan-editor/pages/new-plan-page')) },
       { path: 'fichas/:id', ...page(() => import('../features/plan-editor/pages/plan-editor-page')) },
-      { path: 'dietas', ...comingSoon('Fichas de dieta') },
+      { path: 'dietas', ...page(() => import('../features/diets/pages/diets-page')) },
       { path: 'dietas/:id', ...comingSoon('Editor de dieta') },
       { path: 'check-ins', ...comingSoon('Check-ins') },
       { path: 'check-ins/revisar/:id', ...comingSoon('Revisar check-in') },
