@@ -21,10 +21,11 @@ type LogWeightDrawerProps = {
   lastWeightKg: number | null
   trigger?: ReactElement // botão que abre; o padrão é o "Registrar peso" da Home
   triggerLabel?: string
+  defaultOpen?: boolean // carregado sob demanda depois do toque: já abre
 }
 
-export function LogWeightDrawer({ lastWeightKg, trigger, triggerLabel = 'Registrar peso' }: LogWeightDrawerProps) {
-  const [open, setOpen] = useState(false)
+export function LogWeightDrawer({ lastWeightKg, trigger, triggerLabel = 'Registrar peso', defaultOpen = false }: LogWeightDrawerProps) {
+  const [open, setOpen] = useState(defaultOpen)
   const [kg, setKg] = useState(lastWeightKg ?? DEFAULT_KG)
   const logWeight = useLogWeight()
 
@@ -45,9 +46,7 @@ export function LogWeightDrawer({ lastWeightKg, trigger, triggerLabel = 'Registr
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerTrigger
-        render={
-          trigger ?? <Button variant="outline" size="sm" className="h-9 border-primary px-3.5 font-bold text-primary hover:bg-primary/10" />
-        }
+        render={trigger ?? <Button variant="outline" size="sm" className="h-9 border-primary px-3.5 font-bold text-primary hover:bg-primary/10" />}
       >
         <Plus aria-hidden="true" strokeWidth={2.4} />
         {triggerLabel}

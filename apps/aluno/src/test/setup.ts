@@ -1,8 +1,11 @@
 import '@testing-library/jest-dom/vitest'
-import { cleanup } from '@testing-library/react'
+import { cleanup, configure } from '@testing-library/react'
 import { afterAll, afterEach, beforeAll, beforeEach, vi } from 'vitest'
 import { resetDb, setLatency, setScenario } from '@workspace/mocks/handlers'
 import { server } from '@workspace/mocks/node'
+
+// A primeira busca de cada teste espera a rota (lazy) compilar; com os pacotes rodando juntos passa de 1 s
+configure({ asyncUtilTimeout: 3000 })
 
 beforeAll(() => {
   setLatency(0)

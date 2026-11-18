@@ -70,7 +70,7 @@ export function StudentsTable({ students, now, page, selection, onSelectionChang
       header: 'Tags',
       cell: ({ row }) => (
         <div className="flex flex-wrap gap-1">
-          {row.original.tags.map((t) => (
+          {row.original.tags.filter((t) => t !== 'Online').map((t) => (
             <span key={t} className="flex h-5.5 items-center rounded-full border border-input px-2 text-[11px] font-bold text-foreground-2">
               {t}
             </span>

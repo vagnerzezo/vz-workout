@@ -6,6 +6,7 @@ import { defineConfig } from "vite"
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: process.env.APP_BASE_PATH ?? "/",
   plugins: [react(), tailwindcss()],
   server: { port: 5174 }, // seção 4.2 do guia: roda junto com o aluno (5173)
   resolve: {

@@ -8,6 +8,15 @@ importers:
 
   .:
     devDependencies:
+      '@axe-core/playwright':
+        specifier: 4.11.0
+        version: 4.11.0(playwright-core@1.56.1)
+      '@playwright/test':
+        specifier: 1.56.1
+        version: 1.56.1
+      '@types/node':
+        specifier: ^24.19.2
+        version: 24.19.2
       prettier:
         specifier: ^3.9.10
         version: 3.9.10
@@ -227,61 +236,6 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@24.19.2)(jsdom@30.1.3)(msw@2.15.0(@types/node@24.19.2)(typescript@6.0.3))(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2))
 
-  apps/web:
-    dependencies:
-      '@workspace/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
-      lucide-react:
-        specifier: ^1.61.0
-        version: 1.61.0(@types/react@19.3.0)(react@19.3.1)
-      react:
-        specifier: ^19.3.1
-        version: 19.3.1
-      react-dom:
-        specifier: ^19.3.1
-        version: 19.3.1(react@19.3.1)
-    devDependencies:
-      '@eslint/js':
-        specifier: ^10
-        version: 10.0.1(eslint@10.13.0(jiti@2.7.0))
-      '@tailwindcss/vite':
-        specifier: ^4
-        version: 4.3.3(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0))
-      '@types/node':
-        specifier: ^24
-        version: 24.19.2
-      '@types/react':
-        specifier: ^19
-        version: 19.3.0
-      '@types/react-dom':
-        specifier: ^19
-        version: 19.3.0(@types/react@19.3.0)
-      '@vitejs/plugin-react':
-        specifier: ^6
-        version: 6.1.2(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0))
-      eslint:
-        specifier: ^10
-        version: 10.13.0(jiti@2.7.0)
-      eslint-plugin-react-hooks:
-        specifier: ^7.1.1
-        version: 7.1.1(eslint@10.13.0(jiti@2.7.0))
-      eslint-plugin-react-refresh:
-        specifier: ^0.5.7
-        version: 0.5.7(eslint@10.13.0(jiti@2.7.0))
-      globals:
-        specifier: ^17
-        version: 17.13.0
-      typescript:
-        specifier: ~6.0.2
-        version: 6.0.3
-      typescript-eslint:
-        specifier: ^8
-        version: 8.71.2(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3)
-      vite:
-        specifier: ^8
-        version: 8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)
-
   packages/core:
     dependencies:
       date-fns:
@@ -417,6 +371,11 @@ packages:
   '@asamuzakjp/dom-selector@10.0.5':
     resolution: {integrity: sha512-EgmJ7oEaGQECTn3H3wmnQpEy4hKY66VvM7VQndwPIQob3p877BgbyOUE3EX0LgXQCciF2H8KMdR+RznqjMNOLw==}
     engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
+
+  '@axe-core/playwright@4.11.0':
+    resolution: {integrity: sha512-70vBT/Ylqpm65RQz2iCG2o0JJCEG/WCNyefTr2xcOcr1CoSee60gNQYUMZZ7YukoKkFLv26I/jjlsvwwp532oQ==}
+    peerDependencies:
+      playwright-core: '>= 1.0.0'
 
   '@babel/code-frame@7.29.7':
     resolution: {integrity: sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw==}
@@ -1625,6 +1584,11 @@ packages:
   '@oxc-project/types@0.152.0':
     resolution: {integrity: sha512-oM/5rLBm2tPkg0iBgkH/FOeR3PCDpY19GTgAZjMFM8h9WI9VW7cLgzp6nwtarYKmovavIQZ+Fe/RKX/8C8O/Rw==}
 
+  '@playwright/test@1.56.1':
+    resolution: {integrity: sha512-vSMYtL/zOcFpvJCW71Q/OEGQb7KYBPAdKh35WNSkaZA75JlAO8ED8UN6GUNTm3drWomcbcqRPFqQbLae8yBTdg==}
+    engines: {node: '>=18'}
+    hasBin: true
+
   '@rolldown/binding-android-arm-eabi@1.2.12':
     resolution: {integrity: sha512-dB/a1214qKfHMXCpgqR4OZT+jS4kTyEXbQGJPqzobt5EwH5rX080pxE37alt3RzvR1bf1Yz/yGqRfrYAxuPw0A==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -2362,6 +2326,10 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
+  axe-core@4.11.4:
+    resolution: {integrity: sha512-KunSNx+TVpkAw/6ULfhnx+HWRecjqZGTOyquAoWHYLRSdK1tB5Ihce1ZW+UY3fj33bYAFWPu7W/GRSmmrCGuxA==}
+    engines: {node: '>=4'}
+
   babel-plugin-polyfill-corejs2@0.4.17:
     resolution: {integrity: sha512-aTyf30K/rqAsNwN76zYrdtx8obu0E4KoUME29B1xj+B3WxgvWkp943vYQ+z8Mv3lw9xHXMHpvSPOBxzAkIa94w==}
     peerDependencies:
@@ -2984,6 +2952,11 @@ packages:
   fs-extra@9.1.0:
     resolution: {integrity: sha512-hcg3ZmepS30/7BSFqRvoo3DOMQu7IjqxO5nCDt+zM9XWjb33Wg7ziNT+Qvqbuc3+gWpzO02JubVyk2G4Zvo1OQ==}
     engines: {node: '>=10'}
+
+  fsevents@2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -3928,6 +3901,16 @@ packages:
   pkg-up@3.1.0:
     resolution: {integrity: sha512-nDywThFk1i4BQK4twPQ6TA4RT8bDY96yeuCVBWL3ePARCiEKDRSrNGbFIgUJpLp+XeIR65v8ra7WuJOFUBtkMA==}
     engines: {node: '>=8'}
+
+  playwright-core@1.56.1:
+    resolution: {integrity: sha512-hutraynyn31F+Bifme+Ps9Vq59hKuUCz7H1kDOcBs+2oGguKkWTU50bBWrtz34OUWmIwpBTWDxaRPXrIXkgvmQ==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  playwright@1.56.1:
+    resolution: {integrity: sha512-aFi5B0WovBHTEvpM3DzXTUaeN6eN0qWnTkKx4NQaH4Wvcmc153PdaY2UBdSYKaGYw+UyWXSVyxDUg5DoPEttjw==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   pngjs@5.0.0:
     resolution: {integrity: sha512-40QW5YalBNfQo5yRYmiw7Yz6TKKVr3h6970B2YE+3fQpsWcrbj1PzJgxeJ19DRQjhMbKPIuMY8rFaXc8moolVw==}
@@ -4960,6 +4943,11 @@ snapshots:
       css-tree: 3.2.1
       is-potential-custom-element-name: 1.0.1
       lru-cache: 11.5.3
+
+  '@axe-core/playwright@4.11.0(playwright-core@1.56.1)':
+    dependencies:
+      axe-core: 4.11.4
+      playwright-core: 1.56.1
 
   '@babel/code-frame@7.29.7':
     dependencies:
@@ -6191,6 +6179,10 @@ snapshots:
 
   '@oxc-project/types@0.152.0': {}
 
+  '@playwright/test@1.56.1':
+    dependencies:
+      playwright: 1.56.1
+
   '@rolldown/binding-android-arm-eabi@1.2.12':
     optional: true
 
@@ -6458,13 +6450,6 @@ snapshots:
       tailwindcss: 4.3.3
       vite: 8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)
 
-  '@tailwindcss/vite@4.3.3(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0))':
-    dependencies:
-      '@tailwindcss/node': 4.3.3
-      '@tailwindcss/oxide': 4.3.3
-      tailwindcss: 4.3.3
-      vite: 8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)
-
   '@tanstack/query-core@5.104.5': {}
 
   '@tanstack/react-query@5.104.5(@types/react@19.3.0)(react@19.3.1)':
@@ -6704,11 +6689,6 @@ snapshots:
       '@rolldown/pluginutils': 1.0.1
       vite: 8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)
 
-  '@vitejs/plugin-react@6.1.2(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0))':
-    dependencies:
-      '@rolldown/pluginutils': 1.0.1
-      vite: 8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)
-
   '@vitest/mocker@5.0.5(msw@2.15.0(@types/node@24.19.2)(typescript@6.0.3))(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2))':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
@@ -6817,6 +6797,8 @@ snapshots:
   available-typed-arrays@1.0.7:
     dependencies:
       possible-typed-array-names: 1.1.0
+
+  axe-core@4.11.4: {}
 
   babel-plugin-polyfill-corejs2@0.4.17(@babel/core@7.29.7):
     dependencies:
@@ -7564,6 +7546,9 @@ snapshots:
       graceful-fs: 4.2.11
       jsonfile: 6.2.1
       universalify: 2.0.1
+
+  fsevents@2.3.2:
+    optional: true
 
   fsevents@2.3.3:
     optional: true
@@ -8391,6 +8376,14 @@ snapshots:
     dependencies:
       find-up: 3.0.0
 
+  playwright-core@1.56.1: {}
+
+  playwright@1.56.1:
+    dependencies:
+      playwright-core: 1.56.1
+    optionalDependencies:
+      fsevents: 2.3.2
+
   pngjs@5.0.0: {}
 
   possible-typed-array-names@1.1.0: {}
@@ -9151,19 +9144,6 @@ snapshots:
       workbox-window: 7.4.1
     transitivePeerDependencies:
       - supports-color
-
-  vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0):
-    dependencies:
-      lightningcss: 1.33.0
-      picomatch: 4.0.7
-      postcss: 8.5.29
-      rolldown: 1.2.12
-      tinyglobby: 0.2.17
-    optionalDependencies:
-      '@types/node': 24.19.2
-      esbuild: 0.28.2
-      fsevents: 2.3.3
-      jiti: 2.7.0
 
   vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2):
     dependencies:

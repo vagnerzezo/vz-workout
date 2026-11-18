@@ -169,7 +169,8 @@ export default function PlanEditorPage() {
   )
 
   const dayTabs = (
-    <div role="tablist" aria-label="Dia" className="-mx-4 flex gap-1.5 overflow-x-auto px-4 lg:mx-0 lg:flex-wrap lg:px-0">
+    <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 lg:mx-0 lg:flex-wrap lg:px-0">
+      <div role="tablist" aria-label="Dia" className="contents">
       {plan.days.map((d) => {
         const on = d.id === day.id
         return (
@@ -192,6 +193,7 @@ export default function PlanEditorPage() {
           </button>
         )
       })}
+      </div>
       {isDesktop && plan.days.length < 6 && (
         <button type="button" onClick={() => draft.dispatch({ type: 'addDay' })} className="h-11 shrink-0 rounded-full border border-dashed border-line-strong px-3.5 text-[13px] font-bold text-foreground-2 outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
           + Dia

@@ -23,11 +23,11 @@ export function PlansAndRules({ finance, desktop }: { finance: CoachFinance; des
         </h2>
         <ul className={cn('grid gap-2', desktop && 'grid-cols-2 gap-3')}>
           {finance.plans.map((p) => (
-            <li key={p.id} className={cn(card, !p.active && 'opacity-70')}>
+            <li key={p.id} className={cn(card, !p.active && 'border-dashed')}>
               <div className="flex items-start justify-between gap-2">
                 <span className="flex flex-col gap-0.5">
                   <span className="text-[15px] font-extrabold">{p.name}</span>
-                  <span className="text-xs text-muted-foreground">{p.description}</span>
+                  <span className="text-xs text-muted-foreground">{p.active ? p.description : 'Fora de venda'}</span>
                 </span>
                 <Switch aria-label={`Plano ${p.name} à venda`} checked={p.active} onCheckedChange={(v) => toggle.mutate({ id: p.id, active: v })} />
               </div>

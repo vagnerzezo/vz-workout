@@ -16,7 +16,7 @@ type HistoryCalendarProps = {
 }
 
 const navButton =
-  'flex size-10 items-center justify-center rounded-full bg-secondary outline-none hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50 disabled:text-line-strong disabled:hover:bg-secondary'
+  'flex size-10 items-center justify-center rounded-full bg-secondary outline-none hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50 disabled:text-muted-foreground disabled:hover:bg-secondary'
 
 export function HistoryCalendar(props: HistoryCalendarProps) {
   const { month, sessions, todayIso, selectedDate, canGoBack, canGoForward, weekText, onMonthChange, onSelectDate } = props
@@ -55,7 +55,7 @@ export function HistoryCalendar(props: HistoryCalendarProps) {
           // Só dias com treino são botões: os outros não fazem nada ao toque
           if (!daySessions) {
             return (
-              <span key={date} className={cn(cell, date > todayIso ? 'text-line-strong' : 'text-muted-foreground')}>
+              <span key={date} className={cn(cell, date > todayIso ? 'font-medium text-muted-foreground' : 'text-foreground-2')}>
                 <span className="text-[12.5px] font-bold">{day}</span>
                 <span aria-hidden="true" className="h-2.75" />
               </span>

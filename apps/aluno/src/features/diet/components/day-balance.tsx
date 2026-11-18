@@ -28,16 +28,15 @@ export function DayBalance({ totals, goals, isToday }: { totals: Macros; goals: 
             const value = totals[m.key]
             const goal = goals[m.key]
             return (
-              <div key={m.key} className="flex flex-col gap-1.25">
-                <div className="flex items-baseline justify-between">
-                  <dt className="text-[13px] text-foreground-2">{m.label}</dt>
-                  <dd className="text-[13px] text-muted-foreground">
-                    <strong className={`text-[15px] ${m.text}`}>{formatInt(value)}</strong> / {formatInt(goal)} g
-                  </dd>
-                </div>
-                <span aria-hidden="true" className="block h-1.5 overflow-hidden rounded-full bg-border">
+              // dl só aceita dt/dd dentro do div: a barra vai num dd escondido do leitor de tela
+              <div key={m.key} className="grid grid-cols-[1fr_auto] items-baseline gap-y-1.25">
+                <dt className="text-[13px] text-foreground-2">{m.label}</dt>
+                <dd className="text-[13px] text-muted-foreground">
+                  <strong className={`text-[15px] ${m.text}`}>{formatInt(value)}</strong> / {formatInt(goal)} g
+                </dd>
+                <dd aria-hidden="true" className="col-span-2 block h-1.5 overflow-hidden rounded-full bg-border">
                   <span className={`block h-1.5 rounded-full ${m.bar}`} style={{ width: `${Math.min((value / goal) * 100, 100)}%` }} />
-                </span>
+                </dd>
               </div>
             )
           })}

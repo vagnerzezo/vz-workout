@@ -31,3 +31,7 @@ dist-ssr
 
 # typescript
 *.tsbuildinfo
+
+# playwright
+test-results
+playwright-report

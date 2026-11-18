@@ -150,7 +150,11 @@ describe('Lista de alunos', () => {
     await user.click(within(screen.getByRole('toolbar', { name: 'Ações em massa' })).getByRole('button', { name: 'Adicionar tag' }))
     await user.click(await screen.findByRole('menuitem', { name: 'Presencial' }))
     expect(await screen.findByText('Tag "Presencial" adicionada a 1 aluno')).toBeInTheDocument()
-    await waitFor(() => expect(within(table()).getAllByRole('row')[1]).toHaveTextContent('OnlineHipertrofiaPresencial'))
+    await waitFor(() => {
+      const row = within(table()).getAllByRole('row')[1]!
+      expect(row).toHaveTextContent('HipertrofiaPresencial')
+      expect(row).not.toHaveTextContent('Online')
+    })
   })
 
   it('celular: "Selecionar" liga a seleção nos cards', async () => {
