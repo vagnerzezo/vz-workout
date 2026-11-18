@@ -134,4 +134,11 @@ import { Button } from "@workspace/ui/components/button"
 
 ## Deploy
 
-Cada app é publicado como um projeto separado na Vercel, com o diretório raiz apontando para `apps/aluno` ou `apps/painel`. O `vercel.json` de cada um redireciona todas as rotas para o `index.html`, para que os links diretos funcionem.
+Os dois apps são publicados juntos em um único projeto na Vercel, com o diretório raiz na raiz do repositório:
+
+- `vz-workout.vercel.app` abre o app do aluno
+- `vz-workout.vercel.app/admin` abre o painel do personal
+
+O `vercel.json` da raiz roda `scripts/build-vercel.mjs`, que gera o build dos dois apps (o painel com `APP_BASE_PATH=/admin/`) e junta tudo em `dist/`. As regras de rewrite mandam `/admin/*` para o `index.html` do painel e o resto para o do aluno, para que os links diretos funcionem.
+
+Para testar o build localmente: `node scripts/build-vercel.mjs`.

@@ -12,6 +12,10 @@
       ],
       "outputs": [
         "dist/**"
+      ],
+      "env": [
+        "APP_BASE_PATH",
+        "VITE_*"
       ]
     },
     "lint": {

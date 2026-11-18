@@ -36,6 +36,7 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: "/index.html",
+        navigateFallbackDenylist: [/^\/admin(\/|$)/], // o painel mora em /admin no mesmo domínio
         globIgnores: ["mockServiceWorker.js"],
         runtimeCaching: [
           {
