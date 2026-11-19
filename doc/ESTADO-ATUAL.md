@@ -4,11 +4,41 @@
 **Branch:** `main`
 **Publicado em:** https://vzworkout.vercel.app (aluno na raiz, painel em `/admin`)
 
+## ▶ Onde paramos (19/11/2026)
+
+- **Último commit:** `476756f feat(painel): editar e excluir exercício próprio na biblioteca`. Árvore limpa na `main`, **ainda não enviada** ao GitHub (sem `git push`) nem publicada na Vercel.
+- **Etapas 1, 2 e 3 do plano concluídas** (detalhes abaixo).
+- **Próximo passo: Etapa 4 — fichas de treino** (`doc/PLANO-ETAPA-1-GERENCIAMENTO-PAINEL.md`, seção "Etapa 4"):
+  1. Exclusão protegida: só modelo sem alunos usando (`studentsUsing === 0`); com vínculo, só arquivar.
+  2. Estados rascunho / publicada / arquivada.
+  3. Publicar e despublicar.
+  4. Versionamento.
+  5. Separar visualização e edição ("Ver" e "Editar" hoje abrem o mesmo editor).
+  6. Atualizar atribuições após alteração.
+  7. Testes de dependências e publicação.
+- **Decidir antes de começar a etapa 4** (muda o comportamento atual: hoje "Salvar" no editor já vale direto para quem usa a ficha):
+  - Publicar uma versão nova atualiza as cópias dos alunos, ou só vale para novas atribuições?
+  - Quantas versões guardar e se dá para voltar a uma anterior.
+- Onde mexer: `apps/painel/src/features/plans/` (lista, cards), `features/plan-editor/` (editor), `packages/mocks/src/handlers/coach-plans.ts` (API simulada), schemas em `packages/core/src/schemas/`.
+- Reaproveitar o que a etapa 1 criou: `ResourceActionMenu`, `ResourceConfirmDialog` (`intent="delete"`), `runAction`.
+
+### Como validar (o mesmo usado nas etapas 1–3)
+
+```bash
+pnpm exec tsc -b apps/painel apps/aluno --noEmit   # typecheck de verdade (ver pendências)
+(cd packages/mocks && pnpm exec tsc --noEmit -p .)
+pnpm lint && pnpm test
+pnpm e2e --project=painel --project=painel-desktop  # Chromium do Playwright já instalado
+```
+
+Última rodada: painel 114 testes, aluno 134, core 312; e2e do painel 63/63.
+
 ## Já feito
 
 - Painel completo sobre a API simulada (MSW): alunos, fichas, dietas, check-ins, chat, notificações, financeiro, biblioteca, configurações/marca.
 - Rodada de qualidade commitada (`13f724a`): e2e com Playwright, `pnpm dev`, `pnpm budget`, ajustes de a11y/performance.
 - Deploy único na Vercel (`4c33a2a`).
+- Etapas 1–3 do plano de gerenciamento: `7c12fea`, `d4be080`, `476756f`.
 
 ## Plano de gerenciamento (`doc/PLANO-ETAPA-1-GERENCIAMENTO-PAINEL.md`)
 
