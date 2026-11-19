@@ -186,6 +186,52 @@ describe('Perfil do aluno', () => {
     expect(await screen.findByText('Marcos Lima foi arquivado')).toBeInTheDocument()
   })
 
+  it('editar dados: valida, avisa número de outro aluno e salva', async () => {
+    const user = userEvent.setup()
+    await openProfile('/alunos/stu_renato?aba=info')
+    await user.click(screen.getByRole('button', { name: 'Editar dados pessoais' }))
+    const form = await screen.findByRole('form', { name: 'Editar dados do aluno' })
+    const save = within(form).getByRole('button', { name: 'Salvar' })
+    expect(within(form).getByLabelText('Nome completo')).toHaveValue('Renato Alves')
+    expect(within(form).getByLabelText('WhatsApp')).toHaveValue('(51) 99876-5432')
+    expect(save).toBeDisabled() // nada mudou ainda
+
+    const name = within(form).getByLabelText('Nome completo')
+    await user.clear(name)
+    await user.type(name, 'Renato')
+    await user.tab()
+    expect(await within(form).findByText('Digite nome e sobrenome')).toBeInTheDocument()
+
+    const phone = within(form).getByLabelText('WhatsApp')
+    await user.clear(phone)
+    await user.type(phone, '51988771234') // o do Pedro
+    expect(await within(form).findByText(/Este número já é de/)).toHaveTextContent('Este número já é de Pedro Nunes.')
+    expect(save).toBeDisabled()
+
+    await user.clear(phone)
+    await user.type(phone, '51991112222')
+    await user.clear(name)
+    await user.type(name, 'Renato Alves Souza')
+    await user.clear(within(form).getByLabelText('Cidade'))
+    await user.type(within(form).getByLabelText('Cidade'), 'Porto Alegre, RS')
+    await user.click(save)
+
+    expect(await screen.findByText('Dados do aluno salvos')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Renato Alves Souza' })).toBeInTheDocument()
+    const personal = screen.getByRole('region', { name: 'Dados pessoais' })
+    expect(personal).toHaveTextContent('Telefone(51) 99111-2222')
+    expect(personal).toHaveTextContent('CidadePorto Alegre, RS')
+  })
+
+  it('editar dados chega pelo menu da lista (?editar=1) e Cancelar fecha sem salvar', async () => {
+    const user = userEvent.setup()
+    const { router } = renderApp('/alunos/stu_renato?aba=info&editar=1')
+    const form = await screen.findByRole('form', { name: 'Editar dados do aluno' }, { timeout: 3000 })
+    await user.click(within(form).getByRole('button', { name: 'Cancelar' }))
+    await waitFor(() => expect(router.state.location.search).toBe('?aba=info'))
+    expect(screen.queryByRole('form', { name: 'Editar dados do aluno' })).not.toBeInTheDocument()
+  })
+
   it('aluno que não existe', async () => {
     renderApp('/alunos/stu_nao_existe')
     expect(await screen.findByRole('heading', { name: 'Aluno não encontrado' }, { timeout: 3000 })).toBeInTheDocument()

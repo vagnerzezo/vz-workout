@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
-import { CoachStudentDiet, CoachStudentPlan, CoachWorkout, StudentAppSettings, StudentAssessments, StudentCheckIn, StudentDetail, type WorkoutDay } from '@workspace/core'
+import { CoachStudentDiet, CoachStudentPlan, CoachWorkout, StudentAppSettings, StudentAssessments, StudentCheckIn, StudentDetail, phoneDigits, type StudentProfileEdit, type WorkoutDay } from '@workspace/core'
 import { api } from '../../../shared/api/client'
+import { refreshPortfolio } from '../../students/api/queries'
 
 export const studentProfileKeys = {
   all: (id: string) => ['student', id] as const,
@@ -108,3 +109,15 @@ export const useRemoveExercise = (id: string) =>
     ({ dayId, itemId }: { dayId: string; itemId: string }) => send(`/coach/students/${id}/workout-plan/days/${dayId}/exercises/${itemId}`, 'DELETE'),
     (p, { dayId, itemId }) => mapDay(p, dayId, (d) => ({ ...d, exercises: d.exercises.filter((e) => e.id !== itemId) })),
   )
+
+/** Salva os dados cadastrais: o perfil recebe a resposta e a lista/menu/dashboard recarregam (nome e e-mail aparecem lá). */
+export function useUpdateStudentProfile(id: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (form: StudentProfileEdit) => api(`/coach/students/${id}`, StudentDetail, { method: 'PATCH', body: JSON.stringify({ ...form, phone: phoneDigits(form.phone) }) }),
+    onSuccess: (detail) => {
+      qc.setQueryData(studentProfileKeys.detail(id), detail)
+      return refreshPortfolio(qc)
+    },
+  })
+}

@@ -15,6 +15,8 @@ type ProfileHeaderProps = {
   detail: StudentDetail
   now: Date
   filterTags: string[]
+  onEdit: () => void
+  onDelete: () => void
   onArchive: () => void
   onUnarchive: () => void
 }
@@ -24,7 +26,7 @@ const outline = 'border-line-strong bg-transparent font-bold'
 /** Só os dígitos, com o 55 do Brasil: o formato que o wa.me aceita. */
 const whatsappUrl = (phone: string) => `https://wa.me/55${phone.replace(/\D/g, '')}`
 
-export function ProfileHeader({ detail: d, now, filterTags, onArchive, onUnarchive }: ProfileHeaderProps) {
+export function ProfileHeader({ detail: d, now, filterTags, onEdit, onDelete, onArchive, onUnarchive }: ProfileHeaderProps) {
   const s = d.student
   const badge = statusBadge[s.status]
   const age = d.birthDate ? `${ageOn(d.birthDate, now)} anos` : null
@@ -117,9 +119,11 @@ export function ProfileHeader({ detail: d, now, filterTags, onArchive, onUnarchi
             triggerSize="icon"
             triggerClassName={cn('hidden lg:inline-flex', outline)}
             actions={[
+              { kind: 'edit', label: 'Editar dados', onSelect: onEdit },
               { kind: 'whatsapp', render: <a href={whatsappUrl(d.phone ?? '')} target="_blank" rel="noreferrer" />, when: !!d.phone },
               { kind: 'restore', label: 'Reativar', onSelect: onUnarchive, when: s.status === 'archived' },
               { kind: 'archive', onSelect: onArchive, when: s.status !== 'archived' },
+              { kind: 'delete', label: 'Excluir convite', onSelect: onDelete, when: s.status === 'pending' },
             ]}
           />
         </div>

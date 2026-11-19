@@ -107,6 +107,27 @@ describe('Lista de alunos', () => {
     expect(screen.getByRole('button', { name: 'Convite reenviado para Fernanda Luz' })).toBeDisabled()
   })
 
+  it('excluir convite pendente pelo menu ⋯, com confirmação; quem tem histórico só arquiva', async () => {
+    const user = userEvent.setup()
+    await openList('/alunos?aba=pendentes')
+    const row = (name: string) => within(table()).getByRole('row', { name: new RegExp(name) })
+    await user.click(within(row('Rafael Costa')).getByRole('button', { name: 'Mais ações para Rafael Costa' }))
+    expect(await screen.findByRole('menuitem', { name: 'Editar dados' })).toBeInTheDocument()
+    await user.click(screen.getByRole('menuitem', { name: 'Excluir convite' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Excluir o convite de Rafael Costa?' })
+    await user.click(within(dialog).getByRole('button', { name: 'Excluir' }))
+    expect(await screen.findByText('Convite de Rafael Costa excluído')).toBeInTheDocument()
+    await waitFor(() => expect(tableNames()).toEqual(['Fernanda Luz', 'Sofia Martins']))
+    expect(screen.getByRole('button', { name: /Pendentes/ })).toHaveTextContent('2')
+
+    await user.click(screen.getByRole('button', { name: /Ativos/ }))
+    const first = within(table()).getAllByRole('row')[1]!
+    const name = first.querySelector('strong')!.textContent!
+    await user.click(within(first).getByRole('button', { name: `Mais ações para ${name}` }))
+    expect(await screen.findByRole('menuitem', { name: 'Arquivar' })).toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', { name: 'Excluir convite' })).not.toBeInTheDocument()
+  })
+
   it('vencidos vazio', async () => {
     await openList('/alunos?aba=vencidos')
     expect(within(cards()).getByText('Nenhum aluno vencido. Tudo em dia.')).toBeInTheDocument()

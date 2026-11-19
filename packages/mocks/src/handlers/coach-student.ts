@@ -11,7 +11,7 @@ import type {
   StudentListItem,
   WeightEntry,
 } from '@workspace/core'
-import { formatDecimal, formatPhone, parseIsoDate, shortDate, StudentAppSettings as SettingsSchema, toIsoDate, WorkoutPlan as WorkoutPlanSchema } from '@workspace/core'
+import { formatDecimal, formatPhone, parseIsoDate, phoneDigits, shortDate, StudentAppSettings as SettingsSchema, StudentProfileEdit, toIsoDate, WorkoutPlan as WorkoutPlanSchema } from '@workspace/core'
 import { currentScenario, db, latency } from '../db'
 import { renatoMe } from '../fixtures/renato'
 import { renatoDiet } from '../fixtures/renato-diet'
@@ -101,6 +101,8 @@ const createdOf = (s: Pick<StudentListItem, 'id'>) => db.coach.created.find((c) 
 
 /** WhatsApp do aluno. O do Pedro é o do canvas (o "número já cadastrado" do Novo aluno). */
 export function phoneOf(s: Pick<StudentListItem, 'id'>): string {
+  const edited = db.coach.profileEdits[s.id]
+  if (edited) return formatPhone(edited.phone)
   const created = createdOf(s)
   if (created) return formatPhone(created.form.phone)
   if (s.id === renatoMe.id) return '(51) 99876-5432'
@@ -111,6 +113,12 @@ export function phoneOf(s: Pick<StudentListItem, 'id'>): string {
 
 /** Perfil no painel. O Renato segue o canvas; os outros têm dados genéricos coerentes com a lista. */
 function detailOf(s: StudentListItem, now: Date): StudentDetail {
+  const base = generatedDetailOf(s, now)
+  const edit = db.coach.profileEdits[s.id]
+  return edit ? { ...base, birthDate: edit.birthDate, sex: edit.sex, heightCm: edit.heightCm, city: edit.city || null } : base
+}
+
+function generatedDetailOf(s: StudentListItem, now: Date): StudentDetail {
   const renato = s.id === renatoMe.id
   const created = createdOf(s)
   const seed = seedOf(s.id)
@@ -285,6 +293,30 @@ export const coachStudentHandlers = [
     if (currentScenario() === 'erro') return HttpResponse.json({ message: 'Erro simulado' }, { status: 500 })
     const s = find(params.id as string)
     return s ? HttpResponse.json<StudentDetail>(detailOf(s, new Date())) : notFound()
+  }),
+
+  // Corrige os dados cadastrais. O WhatsApp é o login: não pode ser o de outro aluno
+  http.patch('/api/coach/students/:id', async ({ params, request }) => {
+    const s = find(params.id as string)
+    if (!s) return notFound()
+    const parsed = StudentProfileEdit.safeParse(await request.json().catch(() => null))
+    if (!parsed.success) return HttpResponse.json({ message: 'Dados inválidos', issues: parsed.error.issues }, { status: 422 })
+    const edit = { ...parsed.data, phone: phoneDigits(parsed.data.phone) }
+    const dup = students(new Date()).find((o) => o.id !== s.id && o.status !== 'archived' && phoneDigits(phoneOf(o)) === edit.phone)
+    if (dup) return HttpResponse.json({ message: `Este número já é de ${dup.fullName}`, studentId: dup.id }, { status: 409 })
+    await latency()
+    db.coach.profileEdits[s.id] = edit
+    return HttpResponse.json<StudentDetail>(detailOf(find(s.id)!, new Date()))
+  }),
+
+  // Excluir de vez só vale para convite que nunca virou cadastro: quem já usou o app tem histórico e é arquivado
+  http.delete('/api/coach/students/:id', async ({ params }) => {
+    const s = find(params.id as string)
+    if (!s) return notFound()
+    if (s.status !== 'pending') return HttpResponse.json({ message: 'Aluno com histórico não pode ser excluído; arquive.' }, { status: 409 })
+    await latency()
+    db.coach.deleted.push(s.id)
+    return new HttpResponse(null, { status: 204 })
   }),
 
   http.get('/api/coach/students/:id/workouts', async ({ params }) => {

@@ -12,11 +12,13 @@ import { coachCheckIns } from './coach-checkins'
 import { publishedBranding } from './coach-settings'
 import { allSessions } from './workout'
 
-/** Carteira do treinador com o que já foi arquivado ou reativado nesta sessão. */
+/** Carteira do treinador com o que já foi arquivado, reativado, editado ou excluído nesta sessão. */
 export function students(now: Date): StudentListItem[] {
-  return [...coachStudents(now), ...db.coach.created.map((c) => c.student)].map((student) => {
+  const all = [...coachStudents(now), ...db.coach.created.map((c) => c.student)].filter((student) => !db.coach.deleted.includes(student.id))
+  return all.map((student) => {
     const added = db.coach.addedTags[student.id] ?? []
-    const s = { ...student, tags: [...new Set([...student.tags, ...added])] }
+    const edit = db.coach.profileEdits[student.id] // nome e e-mail corrigidos no perfil
+    const s = { ...student, tags: [...new Set([...student.tags, ...added])], ...(edit && { fullName: edit.fullName, email: edit.email || null }) }
     // O Renato é o aluno do app: o último treino vem das sessões dele (inclui as que ele salvar agora)
     if (s.id === renatoMe.id) s.lastWorkoutOn = allSessions(now, false)[0]?.date ?? s.lastWorkoutOn
     const assigned = db.coach.planAssignments[s.id]

@@ -6,12 +6,14 @@ import { buttonVariants } from '@workspace/ui/components/button'
 import { cn } from '@workspace/ui/lib/utils'
 import { ApiError } from '../../../shared/api/client'
 import { ErrorState } from '../../../shared/components/error-state'
-import { useArchiveStudents, useStudents, useUnarchiveStudents } from '../../students/api/queries'
+import { ResourceConfirmDialog } from '../../../shared/components/resource-confirm-dialog'
+import { useArchiveStudents, useDeleteStudent, useStudents, useUnarchiveStudents } from '../../students/api/queries'
 import { ArchiveDialog } from '../../students/components/archive-dialog'
 import { useStudent, useStudentCheckIns } from '../api/queries'
 import { AssessmentTab } from '../components/assessment-tab'
 import { CheckInsTab } from '../components/check-ins-tab'
 import { DietTab } from '../components/diet-tab'
+import { EditStudentDrawer } from '../components/edit-student-drawer'
 import { HistoryTab } from '../components/history-tab'
 import { InfoTab } from '../components/info-tab'
 import { ProfileHeader } from '../components/profile-header'
@@ -22,14 +24,27 @@ import { WorkoutTab } from '../components/workout-tab'
 
 export default function StudentPage() {
   const { id = '' } = useParams()
-  const [params] = useSearchParams()
+  const [params, setParams] = useSearchParams()
   const navigate = useNavigate()
   const student = useStudent(id)
   const checkIns = useStudentCheckIns(id)
   const { data: list } = useStudents()
   const archive = useArchiveStudents()
   const unarchive = useUnarchiveStudents()
+  const remove = useDeleteStudent()
   const [confirmArchive, setConfirmArchive] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  // ?editar=1 abre "Editar dados" (o menu da lista de alunos chega assim)
+  const editing = params.get('editar') === '1'
+  const setEditing = (on: boolean) =>
+    setParams(
+      (p) => {
+        if (on) p.set('editar', '1')
+        else p.delete('editar')
+        return p
+      },
+      { replace: true },
+    )
   const [now] = useState(() => new Date())
   const tab: ProfileTab = profileTabs.find((t) => t.id === params.get('aba'))?.id ?? 'resumo'
 
@@ -61,6 +76,8 @@ export default function StudentPage() {
             detail={d}
             now={now}
             filterTags={list?.filterTags ?? []}
+            onEdit={() => setEditing(true)}
+            onDelete={() => setConfirmDelete(true)}
             onArchive={() => setConfirmArchive(true)}
             onUnarchive={() =>
               unarchive.mutate([id], {
@@ -80,7 +97,25 @@ export default function StudentPage() {
           {tab === 'historico' && <HistoryTab studentId={id} />}
           {tab === 'avaliacao' && <AssessmentTab studentId={id} />}
           {tab === 'check-ins' && <CheckInsTab studentId={id} />}
-          {tab === 'info' && <InfoTab detail={d} now={now} />}
+          {tab === 'info' && <InfoTab detail={d} now={now} onEdit={() => setEditing(true)} />}
+          <EditStudentDrawer detail={d} open={editing} onClose={() => setEditing(false)} />
+          <ResourceConfirmDialog
+            intent="delete"
+            open={confirmDelete}
+            title={`Excluir o convite de ${d.student.fullName}?`}
+            description="O cadastro e o código de acesso deixam de existir. Não dá para desfazer."
+            pending={remove.isPending}
+            onCancel={() => setConfirmDelete(false)}
+            onConfirm={() =>
+              remove.mutate(id, {
+                onSuccess: () => {
+                  toast.success(`Convite de ${d.student.fullName} excluído`)
+                  navigate('/alunos', { replace: true })
+                },
+                onError: () => toast.error('Não foi possível excluir. Tente de novo.'),
+              })
+            }
+          />
           <ArchiveDialog
             names={confirmArchive ? [d.student.fullName] : []}
             pending={archive.isPending}

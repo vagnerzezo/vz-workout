@@ -25,10 +25,22 @@ Aplicado em: cards de ficha e dieta, menu da linha de alunos, cabeçalho do perf
 Novo: arquivar ficha/dieta agora pede confirmação (antes arquivava direto).
 Não foi criada nenhuma ação sem contrato de dados (ex.: excluir) — entra nas etapas seguintes.
 
-Validação: `tsc -b`, lint, testes unitários (core 312, aluno 134, painel 105) e e2e do painel (63/63) passando.
+Validação: `tsc -b`, lint, testes unitários e e2e do painel passando.
+
+### Etapa 2 — alunos: concluída (19/11)
+
+- **Editar dados** (`student-profile/components/edit-student-drawer.tsx`): nome, WhatsApp, e-mail, nascimento, altura, sexo e cidade.
+  - Schema `StudentProfileEdit` no core reaproveita as regras do Novo aluno (nome e sobrenome, 11 dígitos, e-mail).
+  - Avisa e bloqueia WhatsApp que já é de outro aluno (lookup + 409 da API).
+  - Plano e cobrança ficam fora: mudam no Financeiro.
+  - Entradas: botão "Editar" em Info › Dados pessoais, "Editar dados" no menu ⋯ do perfil e da lista (abre `/alunos/:id?aba=info&editar=1`).
+- **Política de exclusão**: só **convite pendente** pode ser excluído de vez ("Excluir convite", com confirmação). Quem já tem cadastro/histórico só é arquivado (a API devolve 409).
+- API simulada: `PATCH /api/coach/students/:id` e `DELETE /api/coach/students/:id`; edições e exclusões refletem na lista, perfil, contadores e dashboard.
+- Peças de formulário (`field`, `Hint`, `Chips`…) movidas para `shared/components/form-parts.tsx`.
+- Limitação: no celular a lista não tem menu ⋯ e o menu do perfil é só desktop; no celular edita-se pela aba Info, e excluir convite/arquivar pelo perfil não aparece (arquivar no celular já era assim).
+- Tags: continua só adicionar (remover tag fica para depois).
 
 ### Próximas etapas
-- Etapa 2 — edição completa de alunos (reusar `new-student-form` em modo edição).
 - Etapa 3 — editar/excluir exercício próprio (**crítico**: hoje mostra "Editar o exercício chega em breve").
 - Etapas 4/5 — excluir fichas/dietas sem vínculos; rascunho/publicação/versões.
 - Etapa 6 — notificações e financeiro.

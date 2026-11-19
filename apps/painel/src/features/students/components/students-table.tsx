@@ -30,13 +30,14 @@ type StudentsTableProps = {
   onArchive: (ids: string[]) => void
   onUnarchive: (ids: string[]) => void
   onResendInvite: (student: StudentListItem) => void
+  onDelete: (student: StudentListItem) => void
   empty: string
 }
 
 const date = (iso: string | null) => (iso ? shortDate(parseIsoDate(iso)) : '—')
 
 /** Tabela do desktop (Data Table do shadcn com TanStack Table): seleção em lote e páginas de 25. */
-export function StudentsTable({ students, now, page, selection, onSelectionChange, onArchive, onUnarchive, onResendInvite, empty }: StudentsTableProps) {
+export function StudentsTable({ students, now, page, selection, onSelectionChange, onArchive, onUnarchive, onResendInvite, onDelete, empty }: StudentsTableProps) {
   const columns: ColumnDef<StudentListItem>[] = [
     {
       id: 'select',
@@ -133,7 +134,7 @@ export function StudentsTable({ students, now, page, selection, onSelectionChang
               <MessageCircle aria-hidden="true" />
             </Link>
           )}
-          <RowMenu student={s} onArchive={onArchive} onUnarchive={onUnarchive} onResendInvite={onResendInvite} />
+          <RowMenu student={s} onArchive={onArchive} onUnarchive={onUnarchive} onResendInvite={onResendInvite} onDelete={onDelete} />
         </div>
       ),
     },

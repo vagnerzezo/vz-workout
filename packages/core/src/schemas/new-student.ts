@@ -54,3 +54,18 @@ export type CreatedStudent = z.infer<typeof CreatedStudent>
 /** GET /coach/students/lookup?phone=: o aluno que já usa este WhatsApp (404 se ninguém). */
 export const PhoneOwner = z.object({ id: z.string(), fullName: z.string() })
 export type PhoneOwner = z.infer<typeof PhoneOwner>
+
+/**
+ * PATCH /coach/students/:id: dados cadastrais que o treinador pode corrigir depois do convite.
+ * Nome, WhatsApp e e-mail usam as mesmas regras do "Novo aluno". Plano e cobrança mudam no Financeiro.
+ */
+export const StudentProfileEdit = z.object({
+  fullName: NewStudent.shape.fullName,
+  phone: NewStudent.shape.phone,
+  email: NewStudent.shape.email,
+  birthDate: z.iso.date('Data inválida').nullable(),
+  sex: z.enum(['male', 'female']).nullable(),
+  heightCm: z.number('Altura inválida').int('Use centímetros inteiros').min(100, 'Entre 100 e 250 cm').max(250, 'Entre 100 e 250 cm').nullable(),
+  city: z.string().trim().max(80, 'Até 80 caracteres').nullable(),
+})
+export type StudentProfileEdit = z.infer<typeof StudentProfileEdit>

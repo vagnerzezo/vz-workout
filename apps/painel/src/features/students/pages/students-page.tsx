@@ -4,7 +4,9 @@ import { filterStudents, sortStudents, statusCounts, studentsToCsv, toIsoDate, t
 import { Skeleton } from '@workspace/ui/components/skeleton'
 import { useCoach } from '../../../shared/api/coach'
 import { ErrorState } from '../../../shared/components/error-state'
-import { useArchiveStudents, useResendInvite, useStudents, useTagStudents, useUnarchiveStudents } from '../api/queries'
+import { useArchiveStudents, useDeleteStudent, useResendInvite, useStudents, useTagStudents, useUnarchiveStudents } from '../api/queries'
+import { ResourceConfirmDialog } from '../../../shared/components/resource-confirm-dialog'
+import { runAction } from '../../../shared/lib/run-action'
 import { ArchiveDialog } from '../components/archive-dialog'
 import { BulkActions } from '../components/bulk-actions'
 import { ListFilters } from '../components/list-filters'
@@ -35,11 +37,13 @@ export default function StudentsPage() {
   const [selection, setSelection] = useState<Record<string, boolean>>({})
   const [selecting, setSelecting] = useState(false) // modo de seleção do celular
   const [toArchive, setToArchive] = useState<string[]>([])
+  const [toDelete, setToDelete] = useState<StudentListItem | null>(null)
   const [resent, setResent] = useState<string[]>([])
   const archive = useArchiveStudents()
   const unarchive = useUnarchiveStudents()
   const tag = useTagStudents()
   const resend = useResendInvite()
+  const remove = useDeleteStudent()
 
   const all = useMemo(() => list.data?.students ?? [], [list.data])
   const shown = useMemo(
@@ -94,6 +98,9 @@ export default function StudentsPage() {
       },
       onError: () => toast.error('Não foi possível reenviar o convite. Tente de novo.'),
     })
+
+  const confirmDelete = (s: StudentListItem) =>
+    runAction(() => remove.mutateAsync(s.id), { success: `Convite de ${s.fullName} excluído`, error: 'Não foi possível excluir.' }).then((ok) => ok && setToDelete(null))
 
   const empty = params.status === 'overdue' && !params.query && params.tags.length === 0 ? 'Nenhum aluno vencido. Tudo em dia.' : 'Nenhum aluno com esses filtros.'
 
@@ -157,6 +164,7 @@ export default function StudentsPage() {
                 onArchive={setToArchive}
                 onUnarchive={doUnarchive}
                 onResendInvite={resendInvite}
+                onDelete={setToDelete}
                 empty={empty}
               />
               <StudentCards
@@ -182,6 +190,15 @@ export default function StudentsPage() {
           </div>
         </>
       )}
+      <ResourceConfirmDialog
+        intent="delete"
+        open={toDelete !== null}
+        title={`Excluir o convite de ${toDelete?.fullName ?? ''}?`}
+        description="O cadastro e o código de acesso deixam de existir. Não dá para desfazer."
+        pending={remove.isPending}
+        onConfirm={() => toDelete && confirmDelete(toDelete)}
+        onCancel={() => setToDelete(null)}
+      />
       <ArchiveDialog names={toArchive.map(nameOf)} pending={archive.isPending} onConfirm={confirmArchive} onCancel={() => setToArchive([])} />
     </main>
   )

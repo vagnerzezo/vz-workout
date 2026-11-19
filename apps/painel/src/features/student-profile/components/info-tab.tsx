@@ -8,6 +8,8 @@ import {
   type StudentAppSettings,
   type StudentDetail,
 } from '@workspace/core'
+import { Pencil } from 'lucide-react'
+import { Button } from '@workspace/ui/components/button'
 import { Switch } from '@workspace/ui/components/switch'
 import { cn } from '@workspace/ui/lib/utils'
 import { useUpdateSettings } from '../api/queries'
@@ -42,7 +44,7 @@ const switches: { key: Exclude<keyof StudentAppSettings, 'checkInFrequency'>; la
 const payment = { ok: ['Em dia', 'text-primary'], late: ['Atrasado', 'text-destructive'], pending: ['Aguardando o primeiro pagamento', 'text-warning'] } as const
 
 /** Informações: dados pessoais, anamnese, plano e as configurações que o treinador controla. */
-export function InfoTab({ detail: d, now }: { detail: StudentDetail; now: Date }) {
+export function InfoTab({ detail: d, now, onEdit }: { detail: StudentDetail; now: Date; onEdit: () => void }) {
   const update = useUpdateSettings(d.student.id)
   const save = (patch: Partial<StudentAppSettings>, done: string) =>
     update.mutate(patch, { onSuccess: () => toast.success(done), onError: () => toast.error('Não foi possível salvar. Tente de novo.') })
@@ -68,9 +70,15 @@ export function InfoTab({ detail: d, now }: { detail: StudentDetail; now: Date }
   return (
     <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:items-start lg:gap-5">
       <section aria-labelledby="dados-pessoais" className={cardClass}>
-        <h2 id="dados-pessoais" className="text-base font-extrabold">
-          Dados pessoais
-        </h2>
+        <div className="flex items-center justify-between gap-2">
+          <h2 id="dados-pessoais" className="text-base font-extrabold">
+            Dados pessoais
+          </h2>
+          <Button variant="outline" size="sm" onClick={onEdit} aria-label="Editar dados pessoais" className="h-9 border-line-strong px-3 text-xs font-bold">
+            <Pencil aria-hidden="true" />
+            Editar
+          </Button>
+        </div>
         <Rows rows={personal} />
       </section>
 

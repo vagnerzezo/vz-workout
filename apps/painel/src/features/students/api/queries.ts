@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { StudentList } from '@workspace/core'
-import { api } from '../../../shared/api/client'
+import { ApiError, api } from '../../../shared/api/client'
 import { coachKeys } from '../../../shared/api/coach'
 import { dashboardKeys } from '../../dashboard/api/queries'
 
@@ -15,15 +15,15 @@ export function useStudents() {
   })
 }
 
-/** Respostas 204: sem corpo para validar. */
-async function post(path: string, body?: unknown) {
+/** Respostas 204: sem corpo para validar. O status vai no ApiError (409 = regra de negócio). */
+async function post(path: string, body?: unknown, method: 'POST' | 'DELETE' = 'POST') {
   const res = await fetch(`/api${path}`, {
-    method: 'POST',
+    method,
     credentials: 'include',
     headers: body ? { 'Content-Type': 'application/json' } : undefined,
     body: body ? JSON.stringify(body) : undefined,
   })
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  if (!res.ok) throw new ApiError(res.status, await res.text())
 }
 
 /** Depois de mexer na carteira: a lista, os contadores do menu e o dashboard recarregam. */
@@ -46,3 +46,6 @@ export const useTagStudents = () => useRefreshAfter(({ ids, tag }: { ids: string
 export function useResendInvite() {
   return useMutation({ mutationFn: (studentId: string) => post(`/coach/students/${studentId}/invite/resend`) })
 }
+
+/** Excluir de vez: só convite pendente (a API devolve 409 para quem já tem histórico). */
+export const useDeleteStudent = () => useRefreshAfter((id: string) => post(`/coach/students/${id}`, undefined, 'DELETE'))
