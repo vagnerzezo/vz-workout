@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
-import { CoachLibrary, ExerciseDetail, LibraryExercise, type NewExercise } from '@workspace/core'
-import { api } from '../../../shared/api/client'
+import { CoachLibrary, ExerciseDetail, LibraryExercise, type ExerciseEdit, type NewExercise } from '@workspace/core'
+import { ApiError, api } from '../../../shared/api/client'
 
 export const libraryKeys = { all: ['library'] as const, exercise: (id: string) => ['library', 'exercise', id] as const }
 
@@ -21,6 +21,30 @@ function useAddExercise<V>(fn: (v: V) => Promise<LibraryExercise>) {
 
 export const useCreateExercise = () => useAddExercise((n: NewExercise) => api('/coach/library/exercises', LibraryExercise, { method: 'POST', body: JSON.stringify(n) }))
 export const useDuplicateExercise = () => useAddExercise((id: string) => api(`/coach/library/exercises/${id}/duplicate`, LibraryExercise, { method: 'POST' }))
+
+/** Editar um exercício seu: a biblioteca, o detalhe e a lista do editor de ficha recarregam. */
+export function useUpdateExercise(id: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (form: ExerciseEdit) => api(`/coach/library/exercises/${id}`, LibraryExercise, { method: 'PUT', body: JSON.stringify(form) }),
+    onSuccess: () => Promise.all([qc.invalidateQueries({ queryKey: libraryKeys.all }), qc.invalidateQueries({ queryKey: ['exercises'] })]),
+  })
+}
+
+/** Excluir um exercício seu. A API devolve 409 se alguma ficha usa. */
+export function useDeleteExercise() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/coach/library/exercises/${id}`, { method: 'DELETE', credentials: 'include' })
+      if (!res.ok) throw new ApiError(res.status, await res.text())
+    },
+    onSuccess: (_r, id) => {
+      qc.removeQueries({ queryKey: libraryKeys.exercise(id) })
+      return Promise.all([qc.invalidateQueries({ queryKey: libraryKeys.all, exact: true }), qc.invalidateQueries({ queryKey: ['exercises'] })])
+    },
+  })
+}
 
 export function useSendExercise() {
   const qc = useQueryClient()

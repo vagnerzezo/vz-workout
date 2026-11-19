@@ -23,7 +23,7 @@ import { ErrorState } from '../../../shared/components/error-state'
 import { useIsDesktop } from '../../../shared/hooks/use-is-desktop'
 import { useExerciseDetail, useLibrary, useShareMaterial } from '../api/queries'
 import { ExerciseDetailBody, VideoBox } from '../components/exercise-detail'
-import { NewExerciseForm } from '../components/new-exercise-form'
+import { ExerciseForm } from '../components/exercise-form'
 
 type Tab = 'exercises' | 'foods' | 'materials'
 const tabParams: Record<Tab, string | null> = { exercises: null, foods: 'alimentos', materials: 'materiais' }
@@ -124,7 +124,7 @@ function Exercises({ list, desktop, selectedId }: { list: LibraryExercise[]; des
     </div>
   )
 
-  const form = <NewExerciseForm onCancel={() => setCreating(false)} onDone={(e) => (setCreating(false), pick(e.id))} />
+  const form = <ExerciseForm library={list} onCancel={() => setCreating(false)} onDone={(e) => (setCreating(false), pick(e.id))} />
 
   return (
     <div className="flex flex-col gap-3.5 lg:gap-4">

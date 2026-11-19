@@ -75,6 +75,98 @@ describe('Biblioteca (celular)', () => {
     expect(editor[0]).toMatchObject({ name: 'Remada cavalinho (máquina)', primary: 'upperBack', origin: 'coach' })
   })
 
+  it('editar exercício meu: nível, passos, substituições e vídeo; a ficha passa a ver o novo', async () => {
+    const user = userEvent.setup()
+    renderApp('/biblioteca/exercicios/ex_coach_plank_tap')
+    await screen.findByRole('heading', { level: 2, name: 'Prancha com toque no ombro' }, { timeout: 3000 })
+    expect(screen.getByText('Sem vídeo')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Editar' }))
+    const drawer = await screen.findByRole('dialog', { name: 'Editar exercício' })
+    const name = within(drawer).getByRole('textbox', { name: 'Nome' })
+    expect(name).toHaveValue('Prancha com toque no ombro')
+    expect(within(drawer).getByRole('textbox', { name: /Como executar/ })).toHaveValue('Apoio nas mãos, corpo em linha\nToque o ombro oposto sem girar o quadril\nAlterne os lados devagar')
+    expect(within(within(drawer).getByRole('radiogroup', { name: 'Nível' })).getByRole('radio', { name: 'iniciante' })).toHaveAttribute('aria-checked', 'true')
+
+    await user.clear(name)
+    await user.type(name, 'Prancha com toque alternado')
+    await user.click(within(within(drawer).getByRole('radiogroup', { name: 'Nível' })).getByRole('radio', { name: 'intermediário' }))
+    await user.type(within(drawer).getByRole('textbox', { name: /Como executar/ }), '{Enter}Respire sem prender o ar')
+    await user.type(within(drawer).getByRole('textbox', { name: /link do YouTube/ }), 'https://youtube.com/watch?v=abc')
+    await user.click(within(drawer).getByRole('button', { name: 'Salvar alterações' }))
+
+    expect(await screen.findByText('Exercício salvo')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 2, name: 'Prancha com toque alternado' })).toBeInTheDocument()
+    expect(screen.getByText(/intermediário · criado por você/)).toBeInTheDocument()
+    expect(screen.getByText('Respire sem prender o ar')).toBeInTheDocument()
+    expect(screen.getByText('Vídeo · 0:30')).toBeInTheDocument()
+
+    const editor = await fetchJson('/api/coach/exercises')
+    expect(editor.find((e: { id: string }) => e.id === 'ex_coach_plank_tap')).toMatchObject({ name: 'Prancha com toque alternado', level: 'intermediate', videoUrl: 'https://youtube.com/watch?v=abc' })
+  })
+
+  it('editar: remover o vídeo atual', async () => {
+    const user = userEvent.setup()
+    renderApp('/biblioteca/exercicios/ex_coach_bulgarian_pause')
+    await screen.findByRole('heading', { level: 2, name: 'Afundo búlgaro com pausa' }, { timeout: 3000 })
+    expect(screen.getByText('Vídeo · 0:31')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Editar' }))
+    const drawer = await screen.findByRole('dialog', { name: 'Editar exercício' })
+    await user.click(within(drawer).getByRole('button', { name: 'Remover vídeo' }))
+    await user.click(within(drawer).getByRole('button', { name: 'Salvar alterações' }))
+    expect(await screen.findByText('Sem vídeo')).toBeInTheDocument()
+  })
+
+  it('exercício da base não tem Editar nem Excluir', async () => {
+    renderApp('/biblioteca/exercicios/ex_stiff')
+    await screen.findByRole('heading', { level: 2, name: 'Stiff' }, { timeout: 3000 })
+    expect(screen.queryByRole('button', { name: 'Editar' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Excluir exercício' })).not.toBeInTheDocument()
+  })
+
+  it('excluir exercício meu sem uso, com confirmação', async () => {
+    const user = userEvent.setup()
+    const { router } = renderApp('/biblioteca/exercicios/ex_coach_plank_tap')
+    await screen.findByRole('heading', { level: 2, name: 'Prancha com toque no ombro' }, { timeout: 3000 })
+    await user.click(screen.getByRole('button', { name: 'Excluir exercício' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Excluir Prancha com toque no ombro?' })
+    await user.click(within(dialog).getByRole('button', { name: 'Excluir' }))
+    expect(await screen.findByText('Prancha com toque no ombro foi excluído')).toBeInTheDocument()
+    await waitFor(() => expect(router.state.location.pathname).toBe('/biblioteca'))
+    const list = await screen.findByRole('region', { name: 'Exercícios' })
+    expect(within(list).queryByRole('link', { name: /Prancha com toque no ombro/ })).not.toBeInTheDocument()
+  })
+
+  it('exercício em uso numa ficha não exclui; a API também recusa', async () => {
+    // Põe o exercício no Treino A da ficha Full body
+    const tpl = await fetchJson('/api/coach/plans/tpl_full')
+    const day = tpl.plan.days[0]
+    const item = { ...day.exercises[0], id: 'it_teste', exerciseId: 'ex_coach_plank_tap' }
+    const plan = { ...tpl.plan, days: [{ ...day, exercises: [...day.exercises, item] }, ...tpl.plan.days.slice(1)] }
+    expect((await fetch('/api/coach/plans/tpl_full', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan }) })).ok).toBe(true)
+
+    renderApp('/biblioteca/exercicios/ex_coach_plank_tap')
+    await screen.findByRole('heading', { level: 2, name: 'Prancha com toque no ombro' }, { timeout: 3000 })
+    expect(screen.getByRole('button', { name: 'Excluir exercício' })).toBeDisabled()
+    expect(screen.getByText(/^Para excluir, tire o exercício das \d+ fichas acima\.$/)).toBeInTheDocument()
+    expect((await fetch('/api/coach/library/exercises/ex_coach_plank_tap', { method: 'DELETE' })).status).toBe(409)
+  })
+
+  it('em uso só numa ficha arquivada: a API recusa e a tela explica', async () => {
+    const user = userEvent.setup()
+    const tpl = await fetchJson('/api/coach/plans/tpl_full')
+    const day = tpl.plan.days[0]
+    const plan = { ...tpl.plan, days: [{ ...day, exercises: [...day.exercises, { ...day.exercises[0], id: 'it_teste', exerciseId: 'ex_coach_plank_tap' }] }, ...tpl.plan.days.slice(1)] }
+    await fetch('/api/coach/plans/tpl_full', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan }) })
+    await fetch('/api/coach/plans/tpl_full/archive', { method: 'POST' })
+
+    renderApp('/biblioteca/exercicios/ex_coach_plank_tap')
+    await screen.findByRole('heading', { level: 2, name: 'Prancha com toque no ombro' }, { timeout: 3000 })
+    await user.click(screen.getByRole('button', { name: 'Excluir exercício' }))
+    await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Excluir' }))
+    expect(await screen.findByText(/Tire das fichas antes de excluir/)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Prancha com toque no ombro' })).toBeInTheDocument()
+  })
+
   it('alimentos e materiais', async () => {
     const user = userEvent.setup()
     renderApp('/biblioteca?aba=alimentos')

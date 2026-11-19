@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { toast } from 'sonner'
-import { ChevronRight, Search, User } from 'lucide-react'
+import { ChevronRight, Search, Trash2, User } from 'lucide-react'
 import { audioDuration, exerciseLevelLabel, muscleLabel, type ExerciseDetail, type LibraryExercise } from '@workspace/core'
 import { Button } from '@workspace/ui/components/button'
 import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '@workspace/ui/components/drawer'
@@ -10,7 +10,11 @@ import { buttonVariants } from '@workspace/ui/components/button'
 import { cn } from '@workspace/ui/lib/utils'
 import { SelectBox } from '../../students/components/select-box'
 import { useStudents } from '../../students/api/queries'
-import { useDuplicateExercise, useSendExercise } from '../api/queries'
+import { ApiError } from '../../../shared/api/client'
+import { ActionIconButton } from '../../../shared/components/resource-actions'
+import { ResourceConfirmDialog } from '../../../shared/components/resource-confirm-dialog'
+import { useDeleteExercise, useDuplicateExercise, useSendExercise } from '../api/queries'
+import { ExerciseForm } from './exercise-form'
 
 /** Vídeo de execução: sem arquivo na API simulada, fica o espaço com a duração (ou "Sem vídeo"). */
 export function VideoBox({ exercise: e, tall = false }: { exercise: LibraryExercise; tall?: boolean }) {
@@ -91,7 +95,10 @@ export function SendExerciseDrawer({ exercise, open, onOpenChange }: { exercise:
 export function ExerciseDetailBody({ detail, library, showActions }: { detail: ExerciseDetail | undefined; library: LibraryExercise[]; showActions: boolean }) {
   const navigate = useNavigate()
   const duplicate = useDuplicateExercise()
+  const remove = useDeleteExercise()
   const [sending, setSending] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   if (!detail) return <Skeleton aria-label="Carregando o exercício" className="h-80 rounded-[20px]" />
   const e = detail.exercise
   const names = new Map(library.map((x) => [x.id, x.name]))
@@ -102,6 +109,20 @@ export function ExerciseDetailBody({ detail, library, showActions }: { detail: E
         navigate(`/biblioteca/exercicios/${copy.id}`)
       },
       onError: () => toast.error('Não foi possível duplicar.'),
+    })
+  // Excluir só o que nenhuma ficha usa: senão a ficha perderia o exercício
+  const inUse = e.uses > 0
+  const doDelete = () =>
+    remove.mutate(e.id, {
+      onSuccess: () => {
+        toast.success(`${e.name} foi excluído`)
+        setDeleting(false)
+        navigate('/biblioteca', { replace: true })
+      },
+      onError: (err) => {
+        setDeleting(false)
+        toast.error(err instanceof ApiError && err.status === 409 ? 'Este exercício está em alguma ficha (talvez arquivada). Tire das fichas antes de excluir.' : 'Não foi possível excluir. Tente de novo.')
+      },
     })
   return (
     <div className="flex flex-col gap-4">
@@ -182,15 +203,43 @@ export function ExerciseDetailBody({ detail, library, showActions }: { detail: E
               Duplicar e personalizar
             </Button>
           ) : (
-            <Button variant="outline" size="lg" onClick={() => toast('Editar o exercício chega em breve')} className="grow font-extrabold">
+            <Button variant="outline" size="lg" onClick={() => setEditing(true)} className="grow font-extrabold">
               Editar
             </Button>
           )}
           <Button size="lg" onClick={() => setSending(true)} className="grow font-extrabold">
             Enviar para aluno
           </Button>
+          {e.origin === 'coach' && (
+            <ActionIconButton label="Excluir exercício" icon={Trash2} size="icon-lg" disabled={inUse} aria-describedby={inUse ? `excluir-${e.id}` : undefined} onClick={() => setDeleting(true)} className="border-line-strong text-destructive" />
+          )}
         </div>
       )}
+      {showActions && e.origin === 'coach' && inUse && (
+        <p id={`excluir-${e.id}`} className="-mt-2 text-xs text-muted-foreground">
+          Para excluir, tire o exercício {e.uses === 1 ? 'da ficha' : `das ${e.uses} fichas`} acima.
+        </p>
+      )}
+      {e.origin === 'coach' && (
+        <Drawer open={editing} onOpenChange={setEditing}>
+          <DrawerContent className="mx-auto max-h-[90dvh] max-w-[560px] rounded-t-[26px] pb-[env(safe-area-inset-bottom)]">
+            <DrawerHeader className="pt-5 group-data-[swipe-axis=y]/drawer-popup:text-left">
+              <DrawerTitle className="text-[17px] font-extrabold">Editar exercício</DrawerTitle>
+              <DrawerDescription className="text-xs">As fichas que usam este exercício passam a mostrar a versão nova.</DrawerDescription>
+            </DrawerHeader>
+            <div className="overflow-y-auto px-4 pt-2 pb-5">{editing && <ExerciseForm exercise={e} library={library} onCancel={() => setEditing(false)} onDone={() => setEditing(false)} />}</div>
+          </DrawerContent>
+        </Drawer>
+      )}
+      <ResourceConfirmDialog
+        intent="delete"
+        open={deleting}
+        title={`Excluir ${e.name}?`}
+        description="Ele sai da sua biblioteca e das substituições de outros exercícios. Não dá para desfazer."
+        pending={remove.isPending}
+        onConfirm={doDelete}
+        onCancel={() => setDeleting(false)}
+      />
       <SendExerciseDrawer exercise={e} open={sending} onOpenChange={setSending} />
     </div>
   )

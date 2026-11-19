@@ -40,8 +40,17 @@ Validação: `tsc -b`, lint, testes unitários e e2e do painel passando.
 - Limitação: no celular a lista não tem menu ⋯ e o menu do perfil é só desktop; no celular edita-se pela aba Info, e excluir convite/arquivar pelo perfil não aparece (arquivar no celular já era assim).
 - Tags: continua só adicionar (remover tag fica para depois).
 
+### Etapa 3 — exercícios: concluída (19/11)
+
+- **Editar exercício próprio** (o placeholder "chega em breve" saiu): nome, músculos, equipamento, nível, passo a passo, substituições (do mesmo músculo principal, até 5) e vídeo (manter, remover ou trocar por arquivo/link).
+  - `new-exercise-form.tsx` virou `exercise-form.tsx` (criar e editar); o Novo exercício também ganhou nível e substituições.
+  - Core: `NewExercise` com `level`/`alternatives` (com padrão) e `ExerciseEdit` (`keepVideo`).
+- **Excluir exercício próprio** com confirmação. Bloqueado se alguma ficha usa — modelo ativo, **arquivado** (pode voltar) ou ficha de aluno; a tela desabilita o botão quando o "Usado em" > 0 e explica o 409 no caso da ficha arquivada.
+- Exercícios da base: só "Duplicar e personalizar" (a API recusa editar/excluir com 403).
+- API simulada: `PUT` e `DELETE /api/coach/library/exercises/:id`; excluído some também das substituições dos outros.
+- Mídia continua simulada (só o nome do arquivo); upload real depende do backend.
+
 ### Próximas etapas
-- Etapa 3 — editar/excluir exercício próprio (**crítico**: hoje mostra "Editar o exercício chega em breve").
 - Etapas 4/5 — excluir fichas/dietas sem vínculos; rascunho/publicação/versões.
 - Etapa 6 — notificações e financeiro.
 - Etapa 7 — convite de equipe, logout, upload de logo.

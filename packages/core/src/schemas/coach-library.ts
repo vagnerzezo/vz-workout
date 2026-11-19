@@ -58,5 +58,14 @@ export const NewExercise = z.object({
   steps: z.array(z.string().trim().min(1)).max(8),
   videoName: z.string().nullable(), // arquivo escolhido (o upload real fica para a API)
   youtubeUrl: z.union([z.literal(''), z.url('Link inválido')]),
+  level: ExerciseLevel.default('intermediate'),
+  alternatives: z.array(z.string()).max(5, 'Até 5 substituições').default([]), // ids que o aluno pode trocar sozinho
 })
 export type NewExercise = z.infer<typeof NewExercise>
+
+/**
+ * PUT /coach/library/exercises/:id: editar um exercício seu (os da base só se duplicam).
+ * Vídeo: arquivo ou link novo substitui; sem nenhum dos dois, keepVideo decide se o atual fica ou sai.
+ */
+export const ExerciseEdit = NewExercise.extend({ keepVideo: z.boolean() })
+export type ExerciseEdit = z.infer<typeof ExerciseEdit>

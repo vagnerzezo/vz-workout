@@ -42,6 +42,12 @@ function coachPlans(): CoachPlans {
 
 const notFound = () => HttpResponse.json({ message: 'Ficha não encontrada' }, { status: 404 })
 
+/** Algum modelo (inclusive arquivado, que pode voltar) ou ficha de aluno usa o exercício? Excluir quebraria a ficha. */
+export function exerciseInAnyPlan(exerciseId: string): boolean {
+  const plans = [...templates().map(planOf), ...Object.values(db.coach.plans)]
+  return plans.some((p) => p.days.some((d) => d.exercises.some((e) => e.exerciseId === exerciseId)))
+}
+
 /** Fichas que usam o exercício: cada modelo e as cópias dos alunos que o usam (o "Usado em 18 fichas"). */
 export function exerciseUsage(exerciseId: string) {
   const { templates: list } = coachPlans()

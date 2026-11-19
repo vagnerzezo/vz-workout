@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import type { CoachLibrary, ExerciseDetail, Exercise, LibraryExercise, LibraryFood } from '@workspace/core'
-import { NewExercise } from '@workspace/core'
+import { ExerciseEdit, NewExercise } from '@workspace/core'
 import { db, latency, newId } from '../db'
 import { coachExercises, exerciseExtras, genericSteps, materials } from '../fixtures/coach-library'
 import { foodTable } from '../fixtures/diet-templates'
@@ -8,7 +8,7 @@ import { exerciseLibrary } from '../fixtures/renato-plan'
 import { conversationOf, sendFromCoach } from './coach-chat'
 import { students } from './coach'
 import { allDietTemplates } from './coach-diets'
-import { exerciseUsage } from './coach-plans'
+import { exerciseInAnyPlan, exerciseUsage } from './coach-plans'
 
 /** Duração estável por exercício (15 a 31 s), para os que têm vídeo. */
 const seconds = (id: string) => 15 + ([...id].reduce((n, c) => n + c.charCodeAt(0), 0) % 17)
@@ -28,8 +28,12 @@ function enrich(e: Exercise & Partial<LibraryExercise>, base: Exercise[]): Libra
 
 /** Toda a biblioteca: os do treinador (cadastrados e os do canvas) e a base. O editor de ficha usa esta mesma lista. */
 export function libraryExercises(): LibraryExercise[] {
-  const raw = [...db.coach.library.mine, ...coachExercises, ...exerciseLibrary]
-  return raw.map((e) => enrich(e, raw))
+  const { edited, deleted } = db.coach.library
+  const raw = [...db.coach.library.mine, ...coachExercises, ...exerciseLibrary].filter((e) => !deleted.includes(e.id)).map((e) => edited[e.id] ?? e)
+  return raw.map((e) => {
+    const x = enrich(e, raw)
+    return { ...x, alternatives: x.alternatives.filter((id) => !deleted.includes(id)) }
+  })
 }
 
 function libraryFoods(): LibraryFood[] {
@@ -60,9 +64,53 @@ export const coachLibraryHandlers = [
     if (!parsed.success) return HttpResponse.json({ message: 'Exercício inválido', issues: parsed.error.issues }, { status: 422 })
     await latency()
     const n = parsed.data
-    const ex: LibraryExercise = { id: newId('ex_coach'), name: n.name, primary: n.primary, secondary: n.secondary, equipment: n.equipment, videoUrl: n.youtubeUrl || null, origin: 'coach', level: 'intermediate', steps: n.steps, alternatives: [], videoSeconds: n.videoName || n.youtubeUrl ? 30 : null, uses: 0 }
+    const ex: LibraryExercise = { id: newId('ex_coach'), name: n.name, primary: n.primary, secondary: n.secondary, equipment: n.equipment, videoUrl: n.youtubeUrl || null, origin: 'coach', level: n.level, steps: n.steps, alternatives: n.alternatives, videoSeconds: n.videoName || n.youtubeUrl ? 30 : null, uses: 0 }
     db.coach.library.mine = [ex, ...db.coach.library.mine]
     return HttpResponse.json<LibraryExercise>(ex, { status: 201 })
+  }),
+
+  // Editar um exercício seu. Os da base não mudam: duplique e personalize
+  http.put('/api/coach/library/exercises/:id', async ({ params, request }) => {
+    const current = find(params.id)
+    if (!current) return notFound()
+    if (current.origin !== 'coach') return HttpResponse.json({ message: 'Exercício da base: duplique para personalizar' }, { status: 403 })
+    const parsed = ExerciseEdit.safeParse(await request.json().catch(() => null))
+    if (!parsed.success) return HttpResponse.json({ message: 'Exercício inválido', issues: parsed.error.issues }, { status: 422 })
+    await latency()
+    const n = parsed.data
+    const newVideo = !!(n.videoName || n.youtubeUrl)
+    const video = newVideo
+      ? { videoUrl: n.youtubeUrl || null, videoSeconds: 30 }
+      : n.keepVideo
+        ? { videoUrl: current.videoUrl, videoSeconds: current.videoSeconds }
+        : { videoUrl: null, videoSeconds: null }
+    const known = new Set(libraryExercises().map((e) => e.id))
+    const next: LibraryExercise = {
+      ...current,
+      name: n.name,
+      primary: n.primary,
+      secondary: n.secondary.filter((m) => m !== n.primary),
+      equipment: n.equipment,
+      level: n.level,
+      steps: n.steps,
+      alternatives: n.alternatives.filter((id) => id !== current.id && known.has(id)),
+      ...video,
+    }
+    if (db.coach.library.mine.some((e) => e.id === current.id)) db.coach.library.mine = db.coach.library.mine.map((e) => (e.id === current.id ? next : e))
+    else db.coach.library.edited[current.id] = next
+    return HttpResponse.json<LibraryExercise>(find(current.id)!)
+  }),
+
+  // Excluir um exercício seu. Se alguma ficha (modelo, arquivada ou de aluno) usa, não exclui: tire das fichas antes
+  http.delete('/api/coach/library/exercises/:id', async ({ params }) => {
+    const current = find(params.id)
+    if (!current) return notFound()
+    if (current.origin !== 'coach') return HttpResponse.json({ message: 'Exercício da base não pode ser excluído' }, { status: 403 })
+    if (exerciseInAnyPlan(current.id)) return HttpResponse.json({ message: 'Exercício em uso em fichas' }, { status: 409 })
+    await latency()
+    db.coach.library.deleted.push(current.id)
+    db.coach.library.mine = db.coach.library.mine.filter((e) => e.id !== current.id)
+    return new HttpResponse(null, { status: 204 })
   }),
 
   // "Duplicar e personalizar": vira um exercício seu, que você pode mudar
