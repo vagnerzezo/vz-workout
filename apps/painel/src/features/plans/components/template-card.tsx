@@ -1,9 +1,9 @@
 import { Link, useNavigate } from 'react-router'
-import { Copy, MoreHorizontal } from 'lucide-react'
+import { Copy } from 'lucide-react'
 import { levelLabel, parseIsoDate, planGoalLabel, shortDate, studentsUsingLabel, updatedAgo, type PlanGoal, type PlanTemplateSummary } from '@workspace/core'
 import { Button } from '@workspace/ui/components/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@workspace/ui/components/dropdown-menu'
 import { cn } from '@workspace/ui/lib/utils'
+import { ResourceActionMenu } from '../../../shared/components/resource-actions'
 
 export const goalTone: Record<PlanGoal, string> = {
   hypertrophy: 'bg-primary/14 text-primary',
@@ -35,23 +35,15 @@ export function TemplateCard({ template: t, now, onAssign, onDuplicate, onArchiv
           </Link>
           <span className="text-xs text-muted-foreground">{t.split}</span>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger render={<Button variant="outline" size="icon-sm" aria-label={`Mais ações para ${t.name}`} className="shrink-0 border-input text-foreground-2" />}>
-            <MoreHorizontal aria-hidden="true" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="min-w-40">
-            <DropdownMenuItem onClick={() => navigate(editor)}>Editar</DropdownMenuItem>
-            <DropdownMenuItem onClick={onDuplicate}>Duplicar</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            {t.archived ? (
-              <DropdownMenuItem onClick={onUnarchive}>Restaurar</DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem variant="destructive" onClick={onArchive}>
-                Arquivar
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ResourceActionMenu
+          name={t.name}
+          actions={[
+            { kind: 'edit', onSelect: () => navigate(editor) },
+            { kind: 'duplicate', onSelect: onDuplicate },
+            { kind: 'restore', onSelect: onUnarchive, when: t.archived },
+            { kind: 'archive', onSelect: onArchive, when: !t.archived },
+          ]}
+        />
       </div>
 
       <div className="flex flex-wrap gap-1.5">

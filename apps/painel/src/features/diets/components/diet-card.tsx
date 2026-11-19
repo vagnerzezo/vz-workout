@@ -1,9 +1,9 @@
 import { Link, useNavigate } from 'react-router'
-import { Copy, MoreHorizontal } from 'lucide-react'
+import { Copy } from 'lucide-react'
 import { dietGoalLabel, formatInt, macroShares, parseIsoDate, shortDate, studentsUsingLabel, updatedAgo, type DietGoal, type DietTemplateSummary } from '@workspace/core'
 import { Button } from '@workspace/ui/components/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@workspace/ui/components/dropdown-menu'
 import { cn } from '@workspace/ui/lib/utils'
+import { ResourceActionMenu } from '../../../shared/components/resource-actions'
 
 const goalTone: Record<DietGoal, string> = {
   recomposition: 'bg-primary/14 text-primary',
@@ -51,23 +51,15 @@ export function DietCard({ template: t, now, onAssign, onDuplicate, onArchive, o
           </span>
         </div>
         <span className={cn('flex h-5.5 shrink-0 items-center rounded-full px-2 text-[11px] font-extrabold lg:h-6 lg:px-2.5', goalTone[t.goal])}>{dietGoalLabel[t.goal]}</span>
-        <DropdownMenu>
-          <DropdownMenuTrigger render={<Button variant="outline" size="icon-sm" aria-label={`Mais ações para ${t.name}`} className="-my-1 shrink-0 border-input text-foreground-2" />}>
-            <MoreHorizontal aria-hidden="true" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="min-w-40">
-            <DropdownMenuItem onClick={() => navigate(editor)}>Editar</DropdownMenuItem>
-            <DropdownMenuItem onClick={onDuplicate}>Duplicar</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            {t.archived ? (
-              <DropdownMenuItem onClick={onUnarchive}>Restaurar</DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem variant="destructive" onClick={onArchive}>
-                Arquivar
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ResourceActionMenu
+          name={t.name} triggerClassName="-my-1"
+          actions={[
+            { kind: 'edit', onSelect: () => navigate(editor) },
+            { kind: 'duplicate', onSelect: onDuplicate },
+            { kind: 'restore', onSelect: onUnarchive, when: t.archived },
+            { kind: 'archive', onSelect: onArchive, when: !t.archived },
+          ]}
+        />
       </div>
 
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1.5 lg:flex-col lg:items-stretch">

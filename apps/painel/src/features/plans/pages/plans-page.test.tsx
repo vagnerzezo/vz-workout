@@ -60,6 +60,9 @@ describe('Fichas de treino', () => {
 
     await user.click(within(card('Força — 5x5 adaptado')).getByRole('button', { name: 'Mais ações para Força — 5x5 adaptado' }))
     await user.click(await screen.findByRole('menuitem', { name: 'Arquivar' }))
+    const confirm = await screen.findByRole('alertdialog', { name: 'Arquivar Força — 5x5 adaptado?' })
+    expect(confirm).toHaveTextContent('Dá para restaurar depois, na aba Arquivadas.')
+    await user.click(within(confirm).getByRole('button', { name: 'Arquivar' }))
     expect(await screen.findByText('Força — 5x5 adaptado foi arquivada')).toBeInTheDocument()
     await waitFor(() => expect(screen.queryByRole('article', { name: 'Força — 5x5 adaptado' })).not.toBeInTheDocument())
 

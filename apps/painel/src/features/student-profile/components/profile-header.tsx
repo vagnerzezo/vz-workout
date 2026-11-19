@@ -1,14 +1,15 @@
 import { Link } from 'react-router'
 import { toast } from 'sonner'
-import { Bell, ChevronLeft, MessageCircle, MoreHorizontal, Phone } from 'lucide-react'
+import { Bell, ChevronLeft, MessageCircle, Phone } from 'lucide-react'
 import { format } from 'date-fns'
 import { adherenceTone, ageOn, initials, parseIsoDate, shortDate, type StudentDetail } from '@workspace/core'
 import { RingProgress } from '@workspace/ui/blocks/ring-progress'
-import { Button, buttonVariants } from '@workspace/ui/components/button'
+import { buttonVariants } from '@workspace/ui/components/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@workspace/ui/components/dropdown-menu'
 import { cn } from '@workspace/ui/lib/utils'
 import { useTagStudents } from '../../students/api/queries'
 import { adherenceStroke, statusBadge } from '../../students/components/tones'
+import { ResourceActionMenu } from '../../../shared/components/resource-actions'
 
 type ProfileHeaderProps = {
   detail: StudentDetail
@@ -112,21 +113,15 @@ export function ProfileHeader({ detail: d, now, filterTags, onArchive, onUnarchi
               WhatsApp
             </a>
           )}
-          <DropdownMenu>
-            <DropdownMenuTrigger render={<Button variant="outline" size="icon" aria-label="Mais ações" className={cn('hidden lg:inline-flex', outline)} />}>
-              <MoreHorizontal aria-hidden="true" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-44">
-              {d.phone && <DropdownMenuItem render={<a href={whatsappUrl(d.phone)} target="_blank" rel="noreferrer" />}>Abrir WhatsApp</DropdownMenuItem>}
-              {s.status === 'archived' ? (
-                <DropdownMenuItem onClick={onUnarchive}>Reativar</DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem variant="destructive" onClick={onArchive}>
-                  Arquivar
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ResourceActionMenu
+            triggerSize="icon"
+            triggerClassName={cn('hidden lg:inline-flex', outline)}
+            actions={[
+              { kind: 'whatsapp', render: <a href={whatsappUrl(d.phone ?? '')} target="_blank" rel="noreferrer" />, when: !!d.phone },
+              { kind: 'restore', label: 'Reativar', onSelect: onUnarchive, when: s.status === 'archived' },
+              { kind: 'archive', onSelect: onArchive, when: s.status !== 'archived' },
+            ]}
+          />
         </div>
       </header>
     </>

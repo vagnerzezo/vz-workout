@@ -46,6 +46,9 @@ describe('Fichas de dieta', () => {
 
     await user.click(within(card('Low carb 1.800 kcal')).getByRole('button', { name: 'Mais ações para Low carb 1.800 kcal' }))
     await user.click(await screen.findByRole('menuitem', { name: 'Arquivar' }))
+    const confirm = await screen.findByRole('alertdialog', { name: 'Arquivar Low carb 1.800 kcal?' })
+    expect(confirm).toHaveTextContent('Dá para restaurar depois, na aba Arquivadas.')
+    await user.click(within(confirm).getByRole('button', { name: 'Arquivar' }))
     expect(await screen.findByText('Low carb 1.800 kcal foi arquivada')).toBeInTheDocument()
     await user.click(tab(/Arquivadas/))
     expect(within(await screen.findByRole('region', { name: 'Dietas arquivadas' })).getByRole('article', { name: 'Low carb 1.800 kcal' })).toBeInTheDocument()

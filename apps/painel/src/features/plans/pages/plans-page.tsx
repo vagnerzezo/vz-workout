@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { toast } from 'sonner'
 import { ChevronLeft, Plus, Search } from 'lucide-react'
-import { filterTemplates, levelLabel, planGoalLabel, PlanGoal, type PlanTemplateSummary } from '@workspace/core'
+import { filterTemplates, levelLabel, planGoalLabel, PlanGoal, studentsUsingLabel, type PlanTemplateSummary } from '@workspace/core'
 import { Button, buttonVariants } from '@workspace/ui/components/button'
 import { Skeleton } from '@workspace/ui/components/skeleton'
 import { cn } from '@workspace/ui/lib/utils'
@@ -13,6 +13,8 @@ import { AssignPlanDrawer } from '../components/assign-plan-drawer'
 import { AssignedList } from '../components/assigned-list'
 import { TemplateCard } from '../components/template-card'
 import { planTabs, usePlanParams } from '../hooks/use-plan-params'
+import { ResourceConfirmDialog } from '../../../shared/components/resource-confirm-dialog'
+import { runAction } from '../../../shared/lib/run-action'
 
 const fold = (t: string) =>
   t
@@ -36,6 +38,7 @@ export default function PlansPage() {
   const archive = useArchivePlan()
   const unarchive = useUnarchivePlan()
   const [assigning, setAssigning] = useState<PlanTemplateSummary | null>(null)
+  const [archiving, setArchiving] = useState<PlanTemplateSummary | null>(null)
 
   const templates = plans.data?.templates ?? []
   const counts = {
@@ -48,13 +51,14 @@ export default function PlansPage() {
   const assigned = (plans.data?.assigned ?? []).filter((a) => !q || fold(`${a.studentName} ${a.planName}`).includes(q))
   const assignToNames = params.assignTo.map((id) => students.data?.students.find((s) => s.id === id)?.fullName).filter(Boolean)
 
-  const run = (fn: () => Promise<unknown>, ok: string, fail: string) => fn().then(() => toast.success(ok), () => toast.error(fail))
   const actions = (t: PlanTemplateSummary) => ({
     onAssign: () => setAssigning(t),
-    onDuplicate: () => run(() => duplicate.mutateAsync(t.id), `Cópia de “${t.name}” criada`, 'Não foi possível duplicar. Tente de novo.'),
-    onArchive: () => run(() => archive.mutateAsync(t.id), `${t.name} foi arquivada`, 'Não foi possível arquivar. Tente de novo.'),
-    onUnarchive: () => run(() => unarchive.mutateAsync(t.id), `${t.name} voltou para os modelos`, 'Não foi possível restaurar. Tente de novo.'),
+    onDuplicate: () => runAction(() => duplicate.mutateAsync(t.id), { success: `Cópia de “${t.name}” criada`, error: 'Não foi possível duplicar.' }),
+    onArchive: () => setArchiving(t),
+    onUnarchive: () => runAction(() => unarchive.mutateAsync(t.id), { success: `${t.name} voltou para os modelos`, error: 'Não foi possível restaurar.' }),
   })
+  const confirmArchive = (t: PlanTemplateSummary) =>
+    runAction(() => archive.mutateAsync(t.id), { success: `${t.name} foi arquivada`, error: 'Não foi possível arquivar.' }).then((ok) => ok && setArchiving(null))
 
   return (
     <main className="flex flex-col gap-3.5 px-4 pt-[max(16px,env(safe-area-inset-top))] pb-[calc(120px+env(safe-area-inset-bottom))] lg:gap-5 lg:px-8 lg:pt-7 lg:pb-10">
@@ -174,6 +178,19 @@ export default function PlansPage() {
         </>
       )}
 
+      <ResourceConfirmDialog
+        intent="archive"
+        open={archiving !== null}
+        title={`Arquivar ${archiving?.name ?? ''}?`}
+        description={
+          archiving && archiving.studentsUsing > 0
+            ? `Ela sai dos modelos e não pode mais ser atribuída. Quem já usa (${studentsUsingLabel(archiving.studentsUsing)}) continua com a ficha atual. Dá para restaurar depois, na aba Arquivadas.`
+            : 'Ela sai dos modelos e não pode mais ser atribuída. Dá para restaurar depois, na aba Arquivadas.'
+        }
+        pending={archive.isPending}
+        onConfirm={() => archiving && confirmArchive(archiving)}
+        onCancel={() => setArchiving(null)}
+      />
       <AssignPlanDrawer
         template={assigning}
         students={students.data?.students ?? []}
